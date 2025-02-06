@@ -77,12 +77,12 @@ const QAGenerator = () => {
           Generated Q&A
         </Typography>
 
-        {qaList.length === 0 ? (
+        {qaList?.length === 0 ? (
           <Typography variant="body2" color="textSecondary">
             No Q&A generated yet.
           </Typography>
         ) : (
-          qaList.map((qa, index) => (
+          qaList?.map((qa, index) => (
             <Box
               key={index}
               sx={{ p: 2, border: "1px solid #ddd", borderRadius: 1, mb: 2 }}
@@ -92,9 +92,31 @@ const QAGenerator = () => {
                 justifyContent="space-between"
                 alignItems="center"
               >
-                <Box>
+                <Box
+                  sx={{
+                    display: "flex",
+                    flexDirection: "column",
+                    alignItems: "flex-start",
+                    textAlign: "left"
+                  }}
+                >
                   <Typography variant="subtitle1">
                     <strong>Q{index + 1}:</strong> {qa.question}
+                  </Typography>
+                  <Typography variant="body2">
+                    <strong>Ans:</strong> {qa.answer}
+                  </Typography>
+                  <Typography variant="body2">
+                    <strong>Page:</strong> {qa.pageNumber}
+                  </Typography>
+                  <Typography variant="body2">
+                    <strong>Section:</strong> {qa.pageSection}
+                  </Typography>
+                  <Typography variant="body2">
+                    <strong>References:</strong> {qa.references.join(", ")}
+                  </Typography>
+                  <Typography variant="body2">
+                    <strong>Tags:</strong> {qa.tags.join(", ")}
                   </Typography>
                 </Box>
                 <IconButton
