@@ -2,16 +2,11 @@ import React, { useState } from "react";
 import {
   TextField,
   Button,
-  Select,
-  MenuItem,
   Typography,
   Box,
   CircularProgress,
   Grid,
-  IconButton,
-  Chip
 } from "@mui/material";
-import EditIcon from "@mui/icons-material/Edit";
 import TagInput from "./component/TagInput";
 import UploadDocument from "./component/UploadDocument";
 import QAGenerator from "./component/QAGenerator";
@@ -28,31 +23,11 @@ const metadata = {
 const DocumentUpload = () => {
   const [pageLink, setPageLink] = useState("");
   const [docName, setDocName] = useState("");
-  const [category, setCategory] = useState("Category 1");
-  const [file, setFile] = useState(null);
-  const [filePreview, setFilePreview] = useState(null);
   const [numQA, setNumQA] = useState("");
   const [loading, setLoading] = useState(false);
-  const [qaList, setQaList] = useState([]);
-  const [editingIndex, setEditingIndex] = useState(null);
-  const [editQuestion, setEditQuestion] = useState("");
-  const [editAnswer, setEditAnswer] = useState("");
-  const [newQuestion, setNewQuestion] = useState("");
-  const [newAnswer, setNewAnswer] = useState("");
-  const [selectedTags, setSelectedTags] = useState([]);
-  const [summary, setSummary] = useState("");
+  const [qaList, setQaList] = useState([]); 
   const [isDocumentUploaded, setIsDocumentUploaded] = useState(false);
 
-  const tagOptions = ["General", "Technical", "FAQ", "Legal", "Financial"];
-
-  // Handle File Upload
-  const handleFileUpload = (event) => {
-    const uploadedFile = event.target.files[0];
-    if (uploadedFile) {
-      setFile(uploadedFile);
-      setFilePreview(URL.createObjectURL(uploadedFile));
-    }
-  };
 
   const handleUploadSuccess = (response) => {
     console.log("Upload response:", response);
@@ -73,44 +48,6 @@ const DocumentUpload = () => {
       setQaList(generateMockQA(parseInt(numQA, 10) || 0));
       setLoading(false);
     }, 2000);
-  };
-
-  // Handle Editing Q&A
-  const handleEditQA = (index) => {
-    setEditingIndex(index);
-    setEditQuestion(qaList[index].question);
-    setEditAnswer(qaList[index].answer);
-  };
-
-  // Save Edited Q&A
-  const handleSaveQA = () => {
-    const updatedQA = [...qaList];
-    updatedQA[editingIndex] = { question: editQuestion, answer: editAnswer };
-    setQaList(updatedQA);
-    setEditingIndex(null);
-  };
-
-  // Handle Adding New Q&A
-  const handleAddQA = () => {
-    if (!newQuestion || !newAnswer) {
-      alert("Both question and answer are required.");
-      return;
-    }
-    setQaList([
-      ...qaList,
-      { question: newQuestion, answer: newAnswer, tags: selectedTags }
-    ]);
-    setNewQuestion("");
-    setNewAnswer("");
-    setSelectedTags([]);
-    setSummary("");
-  };
-
-  // Handle Selecting Tags
-  const handleTagClick = (tag) => {
-    setSelectedTags((prev) =>
-      prev.includes(tag) ? prev.filter((t) => t !== tag) : [...prev, tag]
-    );
   };
 
   return (

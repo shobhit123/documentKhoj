@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { TextField, Chip, Box } from "@mui/material";
 
-const TagInput = ({tagsArray}) => {
+const TagInput = ({ tagsArray }) => {
   const [tags, setTags] = useState(tagsArray || []);
   const [inputValue, setInputValue] = useState("");
 

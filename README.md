@@ -1,70 +1,82 @@
-# Getting Started with Create React App
+# Document QA System
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+This project is a React-based web application that allows users to upload documents, generate questions based on the content of the document, and submit those questions along with the document. It uses Material UI for the UI components.
 
-## Available Scripts
+## Features
 
-In the project directory, you can run:
+- **Document Upload**: Allows users to upload a document (PDF, DOCX, etc.).
+- **Generate Questions**: Once the document is uploaded, the user can click the "Generate QA" button to generate questions based on the document content.
+- **Submit Questions**: The user can submit the generated questions along with the document for further processing or saving.
 
-### `npm start`
+## Requirements
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in your browser.
+- Node.js (v14 or higher)
+- npm (v6 or higher)
 
-The page will reload when you make changes.\
-You may also see any lint errors in the console.
+## Installation
 
-### `npm test`
+1. Clone the repository to your local machine:
+   ```bash
+   git clone https://github.com/shobhit123/documentKhoj.git
+   ```
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+2. Navigate to the project directory:
+   ```bash
+   cd https://github.com/shobhit123/documentKhoj/tree/develop
+   ```
 
-### `npm run build`
+3. Install the project dependencies:
+   ```bash
+   npm install
+   ```
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+## Running the Application
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
+To run the application locally, execute the following command:
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+```bash
+npm start
+```
 
-### `npm run eject`
+This will start the development server and open the app in your default browser. The application will typically run on [http://localhost:3000](http://localhost:3000).
 
-**Note: this is a one-way operation. Once you `eject`, you can't go back!**
+## Application Workflow
 
-If you aren't satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
+1. **Upload Document**: Users can upload a document by selecting it through the file input.
+2. **Generate QA**: After uploading the document, the user can click the "Generate QA" button to automatically generate questions from the document's content.
+3. **Submit Question**: Once the questions are generated, the user can submit them to the document for further processing or saving.
 
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you're on your own.
+## Technologies Used
 
-You don't have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn't feel obligated to use this feature. However we understand that this tool wouldn't be useful if you couldn't customize it when you are ready for it.
+- **React**: The frontend library for building user interfaces.
+- **Material UI**: A popular React component library used for styling and layout.
+- **npm**: Node Package Manager used for managing project dependencies.
 
-## Learn More
+## Folder Structure
 
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
+```
+/src
+    /API
+        /api.ts     // to make api calls
+    /Document
+        /components
+            - DocumentUploader.js       // Component for uploading the document
+            - QAGenerator.js              // Component for displaying and 
+            submitting questions            
+            - TagInput.js
+        index.js
+    /assets
+        - logo.png                  // Project logo (optional)
+    /helper
+        - index.js              // Utilities for handling file uploads
+    App.js                        // Main app file
+    index.js                      // Entry point for the React application
+```
 
-To learn React, check out the [React documentation](https://reactjs.org/).
+## Contributions
 
-### Code Splitting
+Feel free to fork this repository and contribute by submitting a pull request. Please make sure to follow the code style used in the project and include tests for new features.
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/code-splitting](https://facebook.github.io/create-react-app/docs/code-splitting)
+## License
 
-### Analyzing the Bundle Size
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size](https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size)
-
-### Making a Progressive Web App
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app](https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app)
-
-### Advanced Configuration
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/advanced-configuration](https://facebook.github.io/create-react-app/docs/advanced-configuration)
-
-### Deployment
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/deployment](https://facebook.github.io/create-react-app/docs/deployment)
-
-### `npm run build` fails to minify
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
