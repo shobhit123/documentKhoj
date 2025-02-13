@@ -11,21 +11,9 @@ import {
 import EditIcon from "@mui/icons-material/Edit";
 import TagInput from "./TagInput";
 
-// const generateMockQA = (count) => {
-//   return Array.from({ length: count }, (_, index) => ({
-//     question: `Sample Question ${index + 1}`,
-//     answer: `Sample Answer ${index + 1}`,
-//     pageNumber: index + 1,
-//     pageSection: `Section ${index + 1}`,
-//     references: [`Ref ${index + 1}`],
-//     tags: [`Tag ${index + 1}`]
-//   }));
-// };
 
-const QAGenerator = ({questionList}) => {
-  // const [qaList, setQaList] = useState(generateMockQA(3));
-  console.log('QUESTION LIST', questionList);
-  const [qaList, setQaList] = useState(questionList);
+const QAGenerator = ({document, onQaListChange}) => {  
+  const [qaList, setQaList] = useState(document?.qaList);
   const [openModal, setOpenModal] = useState(false);
   const [editIndex, setEditIndex] = useState(null);
   const [currentQA, setCurrentQA] = useState({
@@ -63,20 +51,26 @@ const QAGenerator = ({questionList}) => {
       alert("Question and Answer are required!");
       return;
     }
-
+  
     const updatedList = [...qaList];
     if (editIndex !== null) {
       updatedList[editIndex] = currentQA; // Editing existing Q&A
     } else {
       updatedList.push(currentQA); // Adding new Q&A
     }
-
+  
     setQaList(updatedList);
+
+    onQaListChange(false, [], updatedList); // Pass updated document to parent
     handleCloseModal();
   };
-
+  
+  const handleTagsChange = (newTags) => {
+    onQaListChange(true, newTags, []); // Ensure both updates are considered
+  };
+  
   return (
-    <Grid item xs={12} md={6}>
+    <Grid item xs={12} md={12}>
       <Box sx={{ p: 4, boxShadow: 3, borderRadius: 2, bgcolor: "white" }}>
         <Typography variant="h5" gutterBottom>
           Generated Q&A
@@ -171,10 +165,7 @@ const QAGenerator = ({questionList}) => {
             type="number"
             value={currentQA.pageNumber}
             onChange={(e) => {
-              const value = e.target.value;
-              if (value >= 1 && value <= 10) {
-                setCurrentQA({ ...currentQA, pageNumber: value });
-              }
+              setCurrentQA({ ...currentQA, pageNumber: e.target.value });              
             }}
             margin="normal"
             inputProps={{
@@ -205,7 +196,7 @@ const QAGenerator = ({questionList}) => {
             margin="normal"
           />
 
-          <TagInput tagsArray={currentQA.tags} />
+          <TagInput tagsArray={currentQA.tags} onTagsChange={handleTagsChange}/>
 
           <Button
             variant="contained"

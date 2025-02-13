@@ -1,19 +1,21 @@
 import React, { useState } from "react";
 import { Box, Button, CircularProgress, Typography } from "@mui/material";
 import CloudUploadIcon from "@mui/icons-material/CloudUpload";
-import { uploadFileService } from "../../API/calls/uploadService.js";
+import { uploadFileService } from "../../API/calls/uploadService";
+import { styles } from "../common/styles";
+import { STRINGS } from "../common/strings";
+
 
 const UploadDocument = ({ onUploadSuccess }) => {
   const [file, setFile] = useState(null);
   const [uploadProgress, setUploadProgress] = useState(0);
   const [uploading, setUploading] = useState(false);
   const [response, setResponse] = useState(null);
-
   const [filePreview, setFilePreview] = useState(null);
 
-  // Allowed file types
-  const allowedTypes = ["pdf", "docx", "xls", "css"];
-  const maxSize = 10 * 1024 * 1024; // 10MB
+  // Allowed file types and size limit
+  const ALLOWED_TYPES = ["pdf", "docx", "xls", "css"];
+  const MAX_SIZE = 10 * 1024 * 1024; // 10MB
 
   // Handle file selection
   const handleFileChange = (event) => {
@@ -21,13 +23,13 @@ const UploadDocument = ({ onUploadSuccess }) => {
     if (!selectedFile) return;
 
     const fileExtension = selectedFile.name.split(".").pop().toLowerCase();
-    if (!allowedTypes.includes(fileExtension)) {
-      alert("Invalid file type. Only PDF, DOCX, XLS, and CSS are allowed.");
+    if (!ALLOWED_TYPES.includes(fileExtension)) {
+      alert(STRINGS.invalidFileType);
       return;
     }
 
-    if (selectedFile.size > maxSize) {
-      alert("File size exceeds 10MB limit.");
+    if (selectedFile.size > MAX_SIZE) {
+      alert(STRINGS.fileSizeExceeded);
       return;
     }
 
@@ -37,7 +39,7 @@ const UploadDocument = ({ onUploadSuccess }) => {
   // Convert file to Base64 and Upload
   const uploadFile = () => {
     if (!file) {
-      alert("Please select a file first.");
+      alert(STRINGS.selectFileFirst);
       return;
     }
 
@@ -49,11 +51,15 @@ const UploadDocument = ({ onUploadSuccess }) => {
       setUploading(true);
       setUploadProgress(0);
       try {
-        const response = await uploadFileService(base64Data, file.name, file.type);                    
-        setResponse(response);        
+        const response = await uploadFileService(
+          base64Data,
+          file.name,
+          file.type
+        );
+        setResponse(response);
         onUploadSuccess(response, file.type);
       } catch (error) {
-        alert("Upload failed");
+        alert(STRINGS.uploadFailed);
       } finally {
         setUploading(false);
         setUploadProgress(100);
@@ -61,64 +67,68 @@ const UploadDocument = ({ onUploadSuccess }) => {
     };
 
     reader.onerror = () => {
-      alert("Failed to read file.");
+      alert(STRINGS.fileReadError);
     };
   };
 
+  // Render file preview based on file type
+  const renderFilePreview = () => {
+    if (!file || !filePreview) return null;
+    return (
+      <Box sx={styles.previewContainer}>
+        <Typography variant="body2">
+          {STRINGS.uploadedFile}: {file.name}
+        </Typography>
+        {file.type.startsWith("image/") ? (
+          <img
+            src={filePreview}
+            alt="Uploaded Preview"
+            style={styles.imagePreview}
+          />
+        ) : file.type === "application/pdf" ? (
+          <iframe
+            src={filePreview}
+            width="100%"
+            height="200px"
+            title="PDF Preview"
+          ></iframe>
+        ) : (
+          <Typography variant="body2">{STRINGS.previewNotAvailable}</Typography>
+        )}
+      </Box>
+    );
+  };
+
   return (
-    <div style={{ textAlign: "center", padding: 20 }}>
+    <Box sx={styles.container}>
       <input
         type="file"
         onChange={handleFileChange}
         accept=".pdf,.docx,.xls,.css"
-      />
+      />      
       <Button
         variant="contained"
         startIcon={<CloudUploadIcon />}
         onClick={uploadFile}
-        style={{ margin: "10px" }}
+        sx={styles.uploadButton}
         disabled={uploading}
       >
-        Upload
+        {STRINGS.uploadButton}
       </Button>
 
-      {/* Upload Progress */}
       {uploading && (
         <CircularProgress variant="determinate" value={uploadProgress} />
       )}
 
-      {/* Show Response */}
       {response && (
         <>
-          {filePreview && (
-            <Box
-              sx={{ mt: 2, p: 2, border: "1px solid #ddd", borderRadius: 1 }}
-            >
-              <Typography variant="body2">Uploaded: {file.name}</Typography>
-              {file.type.startsWith("image/") ? (
-                <img
-                  src={filePreview}
-                  alt="Uploaded Preview"
-                  style={{ width: "100%", borderRadius: 4 }}
-                />
-              ) : file.type === "application/pdf" ? (
-                <iframe
-                  src={filePreview}
-                  width="100%"
-                  height="200px"
-                  title="PDF Preview"
-                ></iframe>
-              ) : (
-                <Typography variant="body2">Preview not available</Typography>
-              )}
-            </Box>
-          )}
-          <Typography variant="body1" style={{ marginTop: "10px" }}>
+          {renderFilePreview()}
+          <Typography variant="body1" sx={styles.successMessage}>
             ✅ {response.message}
-          </Typography>         
+          </Typography>
         </>
       )}
-    </div>
+    </Box>
   );
 };
 

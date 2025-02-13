@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { TextField, Chip, Box } from "@mui/material";
 
-const TagInput = ({tagsArray}) => {
+const TagInput = ({ tagsArray, onTagsChange }) => {
   const [tags, setTags] = useState(tagsArray || []);
   const [inputValue, setInputValue] = useState("");
 
@@ -9,12 +9,15 @@ const TagInput = ({tagsArray}) => {
     if (event.key === "Enter" && inputValue.trim()) {
       event.preventDefault();
       setTags([...tags, inputValue.trim()]);
+      onTagsChange([...tags, inputValue.trim()]);
       setInputValue(""); // Clear input after adding tag
     }
   };
 
   const handleDeleteTag = (tagToDelete) => {
-    setTags(tags.filter((tag) => tag !== tagToDelete));
+    const updatedTags = tags?.filter((tag) => tag !== tagToDelete)
+    setTags(updatedTags)
+    onTagsChange(updatedTags);
   };
 
   return (
@@ -30,7 +33,7 @@ const TagInput = ({tagsArray}) => {
         margin="normal"
       />
       <Box sx={{ display: "flex", flexWrap: "wrap", gap: 1, mt: 1 }}>
-        {tags.map((tag, index) => (
+        {tags?.map((tag, index) => (
           <Chip key={index} label={tag} onDelete={() => handleDeleteTag(tag)} />
         ))}
       </Box>

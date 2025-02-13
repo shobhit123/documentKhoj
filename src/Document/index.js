@@ -3,203 +3,207 @@ import {
   TextField,
   Button,
   Typography,
-  Box,
   CircularProgress,
-  Grid
+  Grid,
+  Card,
+  Stack,
+  Divider
 } from "@mui/material";
 import TagInput from "./component/TagInput";
 import UploadDocument from "./component/UploadDocument";
 import QAGenerator from "./component/QAGenerator";
 import { generateRealQA } from "../helper";
 import { generateQA } from "../API/calls/generateQA";
-
-const metadata = {
-  title: "QNA Creation Utility",
-  description:
-    "QNA Creation Utility to generate Question and Answer based on uploaded document",
-  version: "0.1.0"
-};
+import { STRINGS } from "./common/strings";
+import { submitDocument } from "../API/calls/submitDocument";
 
 const DocumentUpload = () => {
-  const [pageLink, setPageLink] = useState("");
-  const [docName, setDocName] = useState("");
-  const [file, setFile] = useState(null);
-  const [filePreview, setFilePreview] = useState(null);
-  const [numQA, setNumQA] = useState("");
+  const [documentData, setDocumentData] = useState({
+    documentName: "",
+    summary: "",
+    numQA: "",
+    tags: [],
+    fileUploadResponse: null,
+    isDocumentUploaded: false,
+    qaList: []
+  });
+
+  const [updatedDocument, setUpdatedDocument] = useState(documentData || {});
   const [loading, setLoading] = useState(false);
-  const [qaList, setQaList] = useState([]);
-  const [editingIndex, setEditingIndex] = useState(null);
-  const [editQuestion, setEditQuestion] = useState("");
-  const [editAnswer, setEditAnswer] = useState("");
-  const [newQuestion, setNewQuestion] = useState("");
-  const [newAnswer, setNewAnswer] = useState("");
-  const [selectedTags, setSelectedTags] = useState([]);
-  const [summary, setSummary] = useState("");
-  const [isDocumentUploaded, setIsDocumentUploaded] = useState(false);
-  const [fileUploadResponse, setFileUploadResponse] = useState(false);
 
-
-  const handleUploadSuccess = (response, fileType) => {        
-    const object = {
-      object_path: response?.object_path,
-      mimeType: fileType
-    };    
-    setFileUploadResponse(object);
-    setIsDocumentUploaded(true);
+  const handleUploadSuccess = (response, fileType) => {
+    setDocumentData((prevData) => ({
+      ...prevData,
+      fileUploadResponse: {
+        object_path: response?.object_path,
+        mimeType: fileType
+      },
+      isDocumentUploaded: true
+    }));
   };
 
-  // Validate form before generating Q&A
-  const isFormValid = pageLink && docName;
+  const handleChange = (field, value) => {
+    setDocumentData((prevData) => ({
+      ...prevData,
+      [field]: value
+    }));
+  };
 
-  // Handle Generate Q&A
+  const handleTagsChange = (newTags) => {
+    setDocumentData((prevData) => ({
+      ...prevData,
+      tags: newTags
+    }));
+  };
+
   const handleGenerateQA = async () => {
-    if (!isFormValid) {
-      alert("Please fill all the details before generating Q&A.");
+    const { documentName, summary, fileUploadResponse } = documentData;
+    if (!documentName || !summary) {
+      alert(STRINGS.formValidationMessage);
       return;
     }
+
     setLoading(true);
     const response = await generateQA(
-      fileUploadResponse.object_path,
-      fileUploadResponse.mimeType
+      fileUploadResponse?.object_path,
+      fileUploadResponse?.mimeType
     );
-    // Ensure response.qna_response exists
     if (response?.qna_response?.length) {
       setTimeout(() => {
-        setQaList(generateRealQA(response.qna_response));
+        setDocumentData((prevData) => ({
+          ...prevData,
+          qaList: generateRealQA(response.qna_response)
+        }));
         setLoading(false);
       }, 2000);
     }
   };
 
-  // Handle Editing Q&A
-  const handleEditQA = (index) => {
-    setEditingIndex(index);
-    setEditQuestion(qaList[index].question);
-    setEditAnswer(qaList[index].answer);
-  };
-
-  // Save Edited Q&A
-  const handleSaveQA = () => {
-    const updatedQA = [...qaList];
-    updatedQA[editingIndex] = { question: editQuestion, answer: editAnswer };
-    setQaList(updatedQA);
-    setEditingIndex(null);
-  };
-
-  // Handle Adding New Q&A
-  const handleAddQA = () => {
-    if (!newQuestion || !newAnswer) {
-      alert("Both question and answer are required.");
-      return;
+  const handleOnSubmit = async () => {
+    const response = await submitDocument(updatedDocument);
+    if (response?.qna_response?.length) {
+      setTimeout(() => {
+        setDocumentData((prevData) => ({
+          ...prevData,
+          qaList: generateRealQA(response.qna_response)
+        }));
+        setLoading(false);
+      }, 2000);
     }
-    setQaList([
-      ...qaList,
-      { question: newQuestion, answer: newAnswer, tags: selectedTags }
-    ]);
-    setNewQuestion("");
-    setNewAnswer("");
-    setSelectedTags([]);
-    setSummary("");
   };
 
-  // Handle Selecting Tags
-  const handleTagClick = (tag) => {
-    setSelectedTags((prev) =>
-      prev.includes(tag) ? prev.filter((t) => t !== tag) : [...prev, tag]
-    );
+  const handleQAListChange = (isTags, newTags, qnaList) => {
+    if (isTags) {
+      setUpdatedDocument({
+        ...documentData,
+        tags: newTags
+      });
+    } else {
+      setUpdatedDocument({
+        ...documentData,
+        qaList: qnaList
+      });
+    }
   };
 
   return (
     <Grid container spacing={4} sx={{ p: 4 }}>
-      <div style={{ width: "100%" }}>
-        <Typography variant="h4" fontWeight="bold">
-          {metadata.title}
+      {/* Header */}
+      <Grid item xs={12} textAlign="center">
+        <Typography variant="h3" fontWeight="bold" color="primary">
+          {STRINGS.title}
         </Typography>
+        <Typography variant="subtitle1" color="textSecondary">
+          {STRINGS.description} - <strong>{STRINGS.version}</strong>
+        </Typography>
+        <Divider sx={{ my: 2 }} />
+      </Grid>
 
-        <div
-          style={{
-            display: "inline-flex",
-            alignItems: "center",
-            paddingLeft: "16px",
-            gap: "8px"
-          }}
-        >
-          <Typography variant="subtitle1" color="textSecondary">
-            {metadata.description}
-          </Typography>
-          <Typography variant="caption" color="textSecondary">
-            (Version: {metadata.version})
-          </Typography>
-        </div>
-      </div>
-
-      {/* Left Side: Document Upload */}
+      {/* Left Panel - Document Upload */}
       <Grid item xs={12} md={6}>
-        <Box sx={{ p: 4, boxShadow: 3, borderRadius: 2, bgcolor: "white" }}>
-          <Typography variant="h5" gutterBottom>
-            Document Details
+        <Card sx={{ p: 3, borderRadius: 3, boxShadow: 3 }}>
+          <Typography variant="h5" gutterBottom color="secondary">
+            {STRINGS.documentDetails}
           </Typography>
-
           <TextField
             fullWidth
-            label="File Name"
-            value={pageLink}
-            onChange={(e) => setPageLink(e.target.value)}
-            margin="normal"
+            label={STRINGS.fileName}
+            value={documentData.documentName}
+            onChange={(e) => handleChange("documentName", e.target.value)}
+            margin="dense"
           />
           <TextField
             fullWidth
-            label="Summary of Document"
-            value={docName}
-            onChange={(e) => setDocName(e.target.value)}
-            margin="normal"
+            label={STRINGS.summary}
+            value={documentData.summary}
+            onChange={(e) => handleChange("summary", e.target.value)}
+            margin="dense"
             multiline
-            minRows={3} // Allows it to start with 3 rows and expand as needed
-            maxRows={100} // Optional: Limits max expansion
+            minRows={3}
           />
-
           <UploadDocument onUploadSuccess={handleUploadSuccess} />
-
-          <TagInput />
+          <TagInput onTagsChange={handleTagsChange} />
           <TextField
             fullWidth
             type="number"
-            label="No of Q&A"
-            value={numQA}
+            label={STRINGS.numQA}
+            value={documentData.numQA}
             onChange={(e) => {
-              const value = e.target.value;
+              const value = parseInt(e.target.value, 10);
               if (value >= 1 && value <= 10) {
-                setNumQA(value);
+                handleChange("numQA", value);
               }
             }}
-            margin="normal"
-            inputProps={{
-              min: 1,
-              max: 10
-            }}
+            margin="dense"
+            inputProps={{ min: 1, max: 10 }}
           />
-
           <Button
             variant="contained"
-            color="primary"
             fullWidth
-            disabled={loading || !isDocumentUploaded}
+            disabled={loading || !documentData.isDocumentUploaded}
             onClick={handleGenerateQA}
-            sx={{ mt: 2 }}
+            sx={{
+              mt: 2,
+              py: 1.5,
+              fontSize: "1rem",
+              backgroundColor: "#1976d2",
+              ":hover": { backgroundColor: "#1565c0" }
+            }}
           >
-            {loading ? <CircularProgress size={24} /> : "Generate Q&A"}
+            {loading ? <CircularProgress size={24} color="inherit" /> : STRINGS.generateQA}
           </Button>
-          {!isDocumentUploaded && (
-            <Typography variant="h10">
-              please upload document to enable this action
+          {!documentData.isDocumentUploaded && (
+            <Typography variant="body2" color="error" sx={{ mt: 1 }}>
+              {STRINGS.uploadWarning}
             </Typography>
           )}
-        </Box>
+        </Card>
       </Grid>
 
-      {/* Right Side: Q&A Display */}
+      {/* Right Panel - Generated Q&A */}
+      {documentData.qaList.length > 0 && (
+        <Grid item xs={12} md={6}>
+          <QAGenerator document={documentData} onQaListChange={handleQAListChange} />
+        </Grid>
+      )}
 
-      {qaList?.length > 0 && <QAGenerator questionList={qaList}/>}
+      {documentData.qaList.length > 0 && (
+        <Grid item xs={12}>
+          <Button
+            variant="contained"
+            fullWidth
+            onClick={handleOnSubmit}
+            sx={{
+              py: 1.5,
+              fontSize: "1rem",
+              backgroundColor: "#2e7d32",
+              ":hover": { backgroundColor: "#1b5e20" }
+            }}
+          >
+            {STRINGS.submit}
+          </Button>
+        </Grid>
+      )}
     </Grid>
   );
 };
