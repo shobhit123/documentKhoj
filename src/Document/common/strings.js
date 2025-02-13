@@ -1,10 +1,11 @@
 export const STRINGS = {
-  title: "QNA Creation Utility",
+  title: "Khoj Q&A Generator",
   description: "Generate Q&A based on uploaded documents",
   version: "(Version: 0.1.0)",
   documentDetails: "Document Details",
-  fileName: "File Name",
-  summary: "Summary of Document",
+  fileName: "File Name *",
+  pageLink: "Page Link *", 
+  summary: "Summary of Document *",
   numQA: "Number of Q&A",
   generateQA: "Generate Q&A",
   formValidationMessage: "Please fill all the details before generating Q&A.",
@@ -18,5 +19,8 @@ export const STRINGS = {
   uploadFailed: "Upload failed",
   fileReadError: "Failed to read file.",
   previewNotAvailable: "Preview not available",
-  submit: 'Submit'
+  submit: 'Submit',
+  selectFile:"Select Document to Upload",
+  documentUploadSuccess:"Document upload successfully",
+  uploading:"Uploading Document..."
 };

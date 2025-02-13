@@ -2,7 +2,7 @@ import axios from "axios";
 
 
 const api = axios.create({
-  baseURL: "/API/cloud_services",
+  baseURL: "/API/",
   headers: {
     "Content-Type": "application/json",
   }
@@ -20,6 +20,6 @@ export const apiRequest = async (endpoint, method = "GET", data = {}, customHead
     return response.data;
   } catch (error) {
     console.error("API Error:", error.response || error.message);
-    throw error;
+    // throw error;
   }
 };

@@ -1,10 +1,9 @@
 import React, { useState } from "react";
 import { Box, Button, CircularProgress, Typography } from "@mui/material";
 import CloudUploadIcon from "@mui/icons-material/CloudUpload";
+import InsertDriveFileIcon from "@mui/icons-material/InsertDriveFile";
 import { uploadFileService } from "../../API/calls/uploadService";
-import { styles } from "../common/styles";
 import { STRINGS } from "../common/strings";
-
 
 const UploadDocument = ({ onUploadSuccess }) => {
   const [file, setFile] = useState(null);
@@ -13,11 +12,9 @@ const UploadDocument = ({ onUploadSuccess }) => {
   const [response, setResponse] = useState(null);
   const [filePreview, setFilePreview] = useState(null);
 
-  // Allowed file types and size limit
   const ALLOWED_TYPES = ["pdf", "docx", "xls", "css"];
   const MAX_SIZE = 10 * 1024 * 1024; // 10MB
 
-  // Handle file selection
   const handleFileChange = (event) => {
     const selectedFile = event.target.files[0];
     if (!selectedFile) return;
@@ -36,7 +33,6 @@ const UploadDocument = ({ onUploadSuccess }) => {
     setFile(selectedFile);
   };
 
-  // Convert file to Base64 and Upload
   const uploadFile = () => {
     if (!file) {
       alert(STRINGS.selectFileFirst);
@@ -71,12 +67,11 @@ const UploadDocument = ({ onUploadSuccess }) => {
     };
   };
 
-  // Render file preview based on file type
   const renderFilePreview = () => {
     if (!file || !filePreview) return null;
     return (
       <Box sx={styles.previewContainer}>
-        <Typography variant="body2">
+        <Typography variant="body2" sx={{ fontWeight: "bold" }}>
           {STRINGS.uploadedFile}: {file.name}
         </Typography>
         {file.type.startsWith("image/") ? (
@@ -89,7 +84,7 @@ const UploadDocument = ({ onUploadSuccess }) => {
           <iframe
             src={filePreview}
             width="100%"
-            height="200px"
+            height="400px"
             title="PDF Preview"
           ></iframe>
         ) : (
@@ -101,35 +96,149 @@ const UploadDocument = ({ onUploadSuccess }) => {
 
   return (
     <Box sx={styles.container}>
-      <input
-        type="file"
-        onChange={handleFileChange}
-        accept=".pdf,.docx,.xls,.css"
-      />      
-      <Button
-        variant="contained"
-        startIcon={<CloudUploadIcon />}
-        onClick={uploadFile}
-        sx={styles.uploadButton}
-        disabled={uploading}
-      >
-        {STRINGS.uploadButton}
-      </Button>
+      {!filePreview && (
+        <Box>
+          <input
+            type="file"
+            onChange={handleFileChange}
+            accept=".pdf,.docx,.xls,.css"
+            style={{ display: "none" }}
+            id="upload-file-input"
+          />
+          <label htmlFor="upload-file-input">
+            <Button
+              variant="outlined"
+              component="span"
+              startIcon={<InsertDriveFileIcon />}
+              sx={styles.selectFileButton}
+            >
+              {STRINGS.selectFile}
+            </Button>
+          </label>
 
-      {uploading && (
-        <CircularProgress variant="determinate" value={uploadProgress} />
+          {file && (
+            <Typography variant="body2" sx={styles.uploadingText}>
+              {file.name}
+            </Typography>
+          )}
+
+          {file && (
+            <Button
+              variant="contained"
+              startIcon={<CloudUploadIcon />}
+              onClick={uploadFile}
+              sx={styles.uploadButton}
+              disabled={uploading}
+            >
+              {STRINGS.uploadButton}
+            </Button>
+          )}
+
+          {uploading && (
+            <Box sx={styles.uploadProgressContainer}>
+              <CircularProgress
+                variant="determinate"
+                value={uploadProgress}
+                sx={styles.progress}
+              />
+              <Typography variant="body2" sx={styles.uploadingText}>
+                {STRINGS.uploading}
+              </Typography>
+            </Box>
+          )}
+        </Box>
       )}
 
-      {response && (
-        <>
-          {renderFilePreview()}
-          <Typography variant="body1" sx={styles.successMessage}>
-            ✅ {response.message}
+      {renderFilePreview()}
+      {uploading && (
+        <Box sx={styles.uploadProgressContainer}>
+          <CircularProgress
+            variant="determinate"
+            value={uploadProgress}
+            sx={styles.progress}
+          />
+          <Typography variant="body2" sx={styles.uploadingText}>
+            {STRINGS.uploading}
           </Typography>
-        </>
+        </Box>
+      )}
+      {response && (
+        <Box>
+          <Typography variant="body1" sx={styles.successMessage}>
+            {STRINGS.documentUploadSuccess}
+          </Typography>
+        </Box>
       )}
     </Box>
   );
+};
+
+export const styles = {
+  container: {
+    display: "flex",
+    flexDirection: "column",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: "10px",
+    borderRadius: "10px",
+    margin: "auto"
+  },
+  selectFileButton: {
+    width: "100%",
+    padding: "10px 20px",
+    backgroundColor: "#1976d2",
+    color: "#fff",
+    "&:hover": {
+      backgroundColor: "#1565c0"
+    },
+    marginBottom: 1
+  },
+  uploadingText: {
+    fontSize: "14px",
+    color: "#888",
+    marginTop: "10px"
+  },
+  uploadButton: {
+    padding: "12px 20px",
+    backgroundColor: "#4caf50",
+    color: "#fff",
+    "&:hover": {
+      backgroundColor: "#388e3c"
+    }
+  },
+  uploadProgressContainer: {
+    display: "flex",
+    flexDirection: "column",
+    alignItems: "center",
+    gap: "10px"
+  },
+  progress: {
+    marginBottom: "10px"
+  },
+  previewContainer: {
+    display: "flex",
+    flexDirection: "column",
+    alignItems: "center",
+    gap: "10px",
+    padding: "15px",
+    backgroundColor: "#fff",
+    borderRadius: "8px",
+    boxShadow: "0 2px 6px rgba(0, 0, 0, 0.1)",
+    width: "90%",
+    marginTop: 4
+  },
+  imagePreview: {
+    maxWidth: "100%",
+    maxHeight: "200px",
+    objectFit: "contain"
+  },
+  successMessage: {
+    display: "flex",
+    alignItems: "center",
+    color: "#388e3c",
+    justifyContent: "center",
+    marginTop: 1
+  }
 };
 
 export default UploadDocument;

@@ -4,11 +4,24 @@ import {
   Button,
   Typography,
   CircularProgress,
-  Grid,
   Card,
-  Stack,
-  Divider
+  InputAdornment,
+  Box,
+  IconButton,
+  Collapse,
+  Grid
 } from "@mui/material";
+import {
+  Description as DocumentIcon,
+  ExpandLess,
+  ExpandMore,
+  PictureAsPdf as PdfIcon,
+  Save as SaveIcon,
+  Summarize,
+  Quiz,
+  Pages,
+  Description
+} from "@mui/icons-material";
 import TagInput from "./component/TagInput";
 import UploadDocument from "./component/UploadDocument";
 import QAGenerator from "./component/QAGenerator";
@@ -20,6 +33,7 @@ import { submitDocument } from "../API/calls/submitDocument";
 const DocumentUpload = () => {
   const [documentData, setDocumentData] = useState({
     documentName: "",
+    pageLink: "",
     summary: "",
     numQA: "",
     tags: [],
@@ -30,6 +44,8 @@ const DocumentUpload = () => {
 
   const [updatedDocument, setUpdatedDocument] = useState(documentData || {});
   const [loading, setLoading] = useState(false);
+  const [expanded, setExpanded] = useState(true);
+  const [showPDF, setShowPDF] = useState(false);
 
   const handleUploadSuccess = (response, fileType) => {
     setDocumentData((prevData) => ({
@@ -56,9 +72,24 @@ const DocumentUpload = () => {
     }));
   };
 
+  const handleQAListChange = (isTags, newTags, qnaList) => {
+    if (isTags) {
+      setUpdatedDocument({
+        ...documentData,
+        tags: newTags
+      });
+    } else {
+      setUpdatedDocument({
+        ...documentData,
+        qaList: qnaList
+      });
+    }
+  };
+
   const handleGenerateQA = async () => {
-    const { documentName, summary, fileUploadResponse } = documentData;
-    if (!documentName || !summary) {
+    const { documentName, summary, pageLink, fileUploadResponse } =
+      documentData;
+    if (!documentName || !summary || !pageLink) {
       alert(STRINGS.formValidationMessage);
       return;
     }
@@ -75,136 +106,229 @@ const DocumentUpload = () => {
           qaList: generateRealQA(response.qna_response)
         }));
         setLoading(false);
+        setExpanded(false); // Collapse document section after generating questions
       }, 2000);
     }
   };
 
   const handleOnSubmit = async () => {
-    const response = await submitDocument(updatedDocument);
-    if (response?.qna_response?.length) {
-      setTimeout(() => {
-        setDocumentData((prevData) => ({
-          ...prevData,
-          qaList: generateRealQA(response.qna_response)
-        }));
-        setLoading(false);
-      }, 2000);
-    }
-  };
-
-  const handleQAListChange = (isTags, newTags, qnaList) => {
-    if (isTags) {
-      setUpdatedDocument({
-        ...documentData,
-        tags: newTags
+    const response = await submitDocument(updatedDocument); //ToDo: Show loader
+    console.log('response',response)
+    if (response?.record_id) {
+      setDocumentData({
+        documentName: "",
+        pageLink: "",
+        summary: "",
+        numQA: "",
+        tags: [],
+        fileUploadResponse: null,
+        isDocumentUploaded: false,
+        qaList: []
       });
+      alert(
+        "Document has been submitted successfully to the server based on your feedback"
+      );
     } else {
-      setUpdatedDocument({
-        ...documentData,
-        qaList: qnaList
-      });
+      alert("Something went Wrong to update document")
     }
   };
 
   return (
-    <Grid container spacing={4} sx={{ p: 4 }}>
-      {/* Header */}
-      <Grid item xs={12} textAlign="center">
-        <Typography variant="h3" fontWeight="bold" color="primary">
+    <Box container spacing={4} sx={{ p: 3 }}>
+      {/* Collapsible Header */}
+      <Box
+        sx={{
+          display: "flex",
+          justifyContent: "space-between",
+          alignItems: "center",
+          backgroundColor: "#f5f5f5",
+          borderRadius: 2,
+          px: 2,
+          py: 1
+        }}
+      >
+        <Typography variant="h6" fontWeight={600} color="primary">
           {STRINGS.title}
         </Typography>
-        <Typography variant="subtitle1" color="textSecondary">
-          {STRINGS.description} - <strong>{STRINGS.version}</strong>
-        </Typography>
-        <Divider sx={{ my: 2 }} />
-      </Grid>
+        <Box>
+          {documentData.fileUploadResponse?.object_path && !expanded && (
+            <IconButton onClick={() => setShowPDF(!showPDF)} color="primary">
+              <PdfIcon />
+            </IconButton>
+          )}
+          {documentData?.qaList?.length > 0 && (
+            <IconButton
+              onClick={() => {
+                setExpanded(!expanded);
+                setShowPDF(false);
+              }}
+              color="primary"
+            >
+              {expanded ? <ExpandLess /> : <ExpandMore />}
+            </IconButton>
+          )}
+        </Box>
+      </Box>
 
-      {/* Left Panel - Document Upload */}
-      <Grid item xs={12} md={6}>
-        <Card sx={{ p: 3, borderRadius: 3, boxShadow: 3 }}>
-          <Typography variant="h5" gutterBottom color="secondary">
-            {STRINGS.documentDetails}
-          </Typography>
-          <TextField
-            fullWidth
-            label={STRINGS.fileName}
-            value={documentData.documentName}
-            onChange={(e) => handleChange("documentName", e.target.value)}
-            margin="dense"
-          />
-          <TextField
-            fullWidth
-            label={STRINGS.summary}
-            value={documentData.summary}
-            onChange={(e) => handleChange("summary", e.target.value)}
-            margin="dense"
-            multiline
-            minRows={3}
-          />
-          <UploadDocument onUploadSuccess={handleUploadSuccess} />
-          <TagInput onTagsChange={handleTagsChange} />
-          <TextField
-            fullWidth
-            type="number"
-            label={STRINGS.numQA}
-            value={documentData.numQA}
-            onChange={(e) => {
-              const value = parseInt(e.target.value, 10);
-              if (value >= 1 && value <= 10) {
-                handleChange("numQA", value);
-              }
-            }}
-            margin="dense"
-            inputProps={{ min: 1, max: 10 }}
+      {/* PDF Viewer (Toggles on button click) */}
+      {showPDF && !expanded && (
+        <Box sx={{ mt: 2, p: 2, border: "1px solid #ddd", borderRadius: 2 }}>
+          <iframe
+            src={documentData.fileUploadResponse?.object_path}
+            title="PDF Viewer"
+            width="100%"
+            height="400px"
           />
           <Button
-            variant="contained"
+            variant="outlined"
             fullWidth
-            disabled={loading || !documentData.isDocumentUploaded}
-            onClick={handleGenerateQA}
-            sx={{
-              mt: 2,
-              py: 1.5,
-              fontSize: "1rem",
-              backgroundColor: "#1976d2",
-              ":hover": { backgroundColor: "#1565c0" }
-            }}
+            sx={{ mt: 1 }}
+            onClick={() => setShowPDF(false)}
           >
-            {loading ? <CircularProgress size={24} color="inherit" /> : STRINGS.generateQA}
+            Close PDF
           </Button>
-          {!documentData.isDocumentUploaded && (
-            <Typography variant="body2" color="error" sx={{ mt: 1 }}>
-              {STRINGS.uploadWarning}
-            </Typography>
-          )}
-        </Card>
-      </Grid>
-
-      {/* Right Panel - Generated Q&A */}
-      {documentData.qaList.length > 0 && (
-        <Grid item xs={12} md={6}>
-          <QAGenerator document={documentData} onQaListChange={handleQAListChange} />
-        </Grid>
+        </Box>
       )}
 
-      {documentData.qaList.length > 0 && (
-        <Grid item xs={12}>
+      {/* Collapsible Document Details Section */}
+      <Collapse in={expanded}>
+        <Card sx={{ p: 3, borderRadius: 3, boxShadow: 3, mt: 2 }}>
+          <Typography variant="h6" gutterBottom color="secondary">
+            <DocumentIcon sx={{ mr: 1, verticalAlign: "middle" }} />
+            {STRINGS.documentDetails}
+          </Typography>
+
+          <Grid container spacing={3} style={{ alignItems: "center" }}>
+            {/* Left Section: Other Inputs */}
+            <Grid item xs={12} md={6}>
+              <TextField
+                fullWidth
+                label={STRINGS.fileName}
+                placeholder="Enter file name here"
+                value={documentData.documentName}
+                onChange={(e) => handleChange("documentName", e.target.value)}
+                margin="dense"
+                InputProps={{
+                  startAdornment: (
+                    <InputAdornment position="start">
+                      <Description />
+                    </InputAdornment>
+                  )
+                }}
+              />
+
+              <TextField
+                fullWidth
+                label={STRINGS.pageLink}
+                value={documentData.pageLink}
+                placeholder="Enter page link related to this file else input or https://www.hdfcbank.com"
+                onChange={(e) => handleChange("pageLink", e.target.value)}
+                margin="dense"
+                InputProps={{
+                  startAdornment: (
+                    <InputAdornment position="start">
+                      <Pages />
+                    </InputAdornment>
+                  )
+                }}
+              />
+
+              <TextField
+                fullWidth
+                label={STRINGS.summary}
+                value={documentData.summary}
+                placeholder="The document provides recommendations for improving services at HDFC Bank based on research findings"
+                onChange={(e) => handleChange("summary", e.target.value)}
+                margin="dense"
+                multiline
+                minRows={3}
+                InputProps={{
+                  startAdornment: (
+                    <InputAdornment position="start">
+                      <Summarize />
+                    </InputAdornment>
+                  )
+                }}
+              />
+
+              <TagInput onTagsChange={handleTagsChange} />
+
+              <TextField
+                fullWidth
+                type="number"
+                label={STRINGS.numQA}
+                value={documentData.numQA}
+                placeholder="Number of questions required for selected document"
+                onChange={(e) => {
+                  const value = parseInt(e.target.value, 10);
+                  if (value >= 1 && value <= 100) {
+                    handleChange("numQA", value);
+                  }
+                }}
+                margin="dense"
+                InputProps={{
+                  startAdornment: (
+                    <InputAdornment position="start">
+                      <Quiz />
+                    </InputAdornment>
+                  )
+                }}
+              />
+
+              <Button
+                variant="contained"
+                fullWidth
+                disabled={loading || !documentData.isDocumentUploaded}
+                onClick={handleGenerateQA}
+                sx={{ mt: 2, py: 1 }}
+              >
+                {loading ? (
+                  <CircularProgress size={20} color="inherit" />
+                ) : (
+                  STRINGS.generateQA
+                )}
+              </Button>
+
+              {!documentData.isDocumentUploaded && (
+                <Typography variant="body2" color="error" sx={{ mt: 1 }}>
+                  {STRINGS.uploadWarning}
+                </Typography>
+              )}
+            </Grid>
+
+            {/* Right Section: Upload Document */}
+            <Grid item xs={12} md={6}>
+              <UploadDocument onUploadSuccess={handleUploadSuccess} />
+            </Grid>
+          </Grid>
+        </Card>
+      </Collapse>
+
+      {/* QA Section */}
+      {documentData.qaList?.length > 0 && (
+        <Box sx={{ mt: 3 }}>
+          <QAGenerator
+            document={documentData}
+            onQaListChange={handleQAListChange}
+          />
+        </Box>
+      )}
+
+      {/* Submit Button */}
+      {documentData.qaList?.length > 0 && (
+        <Box textAlign="center" sx={{ mt: 2 }}>
           <Button
             variant="contained"
             fullWidth
             onClick={handleOnSubmit}
-            sx={{
-              py: 1.5,
-              fontSize: "1rem",
-              backgroundColor: "#2e7d32",
-              ":hover": { backgroundColor: "#1b5e20" }
-            }}
+            sx={{ py: 1, backgroundColor: "#2e7d32" }}
+            startIcon={<SaveIcon />}
           >
             {STRINGS.submit}
           </Button>
-        </Grid>
+        </Box>
       )}
-    </Grid>
+    </Box>
   );
 };
 

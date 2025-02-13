@@ -8,12 +8,21 @@ import {
   Typography,
   Modal
 } from "@mui/material";
-import EditIcon from "@mui/icons-material/Edit";
+import {
+  Edit as EditIcon,
+  Delete as DeleteIcon,
+  AddCircle as AddCircleIcon,
+  QuestionAnswer as QuestionAnswerIcon,
+  HelpOutline as HelpOutlineIcon,
+  Description as DescriptionIcon,
+  Link as LinkIcon,
+  Label as LabelIcon,
+  QuestionAnswer
+} from "@mui/icons-material";
 import TagInput from "./TagInput";
 
-
-const QAGenerator = ({document, onQaListChange}) => {  
-  const [qaList, setQaList] = useState(document?.qaList);
+const QAGenerator = ({ document, onQaListChange }) => {
+  const [qaList, setQaList] = useState(document?.qaList || []);
   const [openModal, setOpenModal] = useState(false);
   const [editIndex, setEditIndex] = useState(null);
   const [currentQA, setCurrentQA] = useState({
@@ -22,103 +31,211 @@ const QAGenerator = ({document, onQaListChange}) => {
     pageNumber: "",
     pageSection: "",
     references: "",
+    is_llm_generated: false,
     tags: []
   });
 
   const handleOpenModal = (qa = null, index = null) => {
     setEditIndex(index);
     setCurrentQA(
-      qa
-        ? { ...qa }
-        : {
-            question: "",
-            answer: "",
-            pageNumber: "",
-            pageSection: "",
-            references: "",
-            tags: []
-          }
+      qa || {
+        question: "",
+        answer: "",
+        pageNumber: "",
+        pageSection: "",
+        references: "",
+        is_llm_generated: false,
+        tags: []
+      }
     );
     setOpenModal(true);
   };
 
-  const handleCloseModal = () => {
-    setOpenModal(false);
-  };
+  const handleCloseModal = () => setOpenModal(false);
 
   const handleSaveQA = () => {
     if (!currentQA.question || !currentQA.answer) {
       alert("Question and Answer are required!");
       return;
     }
-  
-    const updatedList = [...qaList];
-    if (editIndex !== null) {
-      updatedList[editIndex] = currentQA; // Editing existing Q&A
-    } else {
-      updatedList.push(currentQA); // Adding new Q&A
-    }
-  
-    setQaList(updatedList);
 
-    onQaListChange(false, [], updatedList); // Pass updated document to parent
+    const updatedList = [...qaList];
+    editIndex !== null
+      ? (updatedList[editIndex] = currentQA)
+      : updatedList.push(currentQA);
+
+    setQaList(updatedList);
+    onQaListChange(false, [], updatedList);
     handleCloseModal();
   };
   
   const handleTagsChange = (newTags) => {
-    onQaListChange(true, newTags, []); // Ensure both updates are considered
+    onQaListChange(true, newTags, []);
   };
-  
+
   return (
-    <Grid item xs={12} md={12}>
-      <Box sx={{ p: 4, boxShadow: 3, borderRadius: 2, bgcolor: "white" }}>
-        <Typography variant="h5" gutterBottom>
-          Generated Q&A
-        </Typography>
+    <Box item xs={12} md={12}>
+      <Box>
+        <Box
+          sx={{
+            display: "flex",
+            justifyContent: "space-between",
+            alignItems: "center",
+            backgroundColor: "#f5f5f5",
+            borderRadius: 2,
+            px: 2,
+            py: 1,
+            marginBottom: 2
+          }}
+        >
+          <Typography variant="h6" fontWeight={600} color="primary">
+            Q&A Generator
+          </Typography>
+          <Button
+            variant="contained"
+            color="primary"
+            startIcon={<AddCircleIcon />}
+            onClick={() => handleOpenModal()}
+            sx={{
+              padding: "6px 12px",
+              fontSize: "14px",
+              minWidth: "auto"
+            }}
+          >
+            Add New Q&A
+          </Button>
+        </Box>
 
         {qaList.length === 0 ? (
-          <Typography variant="body2" color="textSecondary">
-            No Q&A generated yet.
+          <Typography
+            variant="body2"
+            color="textSecondary"
+            sx={{ fontStyle: "italic" }}
+          >
+            No Q&A generated yet. Click below to add a new Q&A.
           </Typography>
         ) : (
           qaList.map((qa, index) => (
             <Box
               key={index}
-              sx={{ p: 2, border: "1px solid #ddd", borderRadius: 1, mb: 2 }}
+              sx={{
+                p: 3,
+                border: "1px solid #e0e0e0",
+                borderRadius: 2,
+                mb: 2,
+                bgcolor: "#ffff",
+                boxShadow: 2
+              }}
             >
-              <Box
-                display="flex"
-                justifyContent="space-between"
-                alignItems="center"
-              >
+              <Box display="flex" justifyContent="space-between">
                 <Box>
-                  <Typography variant="subtitle1">
-                    <strong>Q{index + 1}:</strong> {qa.question}
+                  <Typography
+                    variant="h6"
+                    sx={{
+                      fontWeight: 600,
+                      display: "flex",
+                      alignItems: "center",
+                      gap: 1
+                    }}
+                  >
+                    <strong>Q{index + 1}:</strong>
+                    {qa.question}
                   </Typography>
+                  <Typography
+                    variant="body2"
+                    sx={{
+                      fontWeight: 400,
+                      display: "flex",
+                      alignItems: "center",
+                      color: "text.secondary",
+                      gap: 1
+                    }}
+                  >
+                    <QuestionAnswer color="action" />
+                    <strong>Answer:</strong> {qa.answer}
+                  </Typography>
+                  {qa.pageSection && (
+                    <Typography
+                      variant="body2"
+                      sx={{
+                        mt: 1,
+                        color: "text.secondary",
+                        display: "flex",
+                        alignItems: "center",
+                        gap: 1
+                      }}
+                    >
+                      <DescriptionIcon color="action" />{" "}
+                      <strong>Section:</strong> {qa.pageSection}
+                    </Typography>
+                  )}
+                  {qa.references?.length > 0 && (
+                    <Typography
+                      variant="body2"
+                      sx={{
+                        mt: 1,
+                        color: "text.secondary",
+                        display: "flex",
+                        alignItems: "center",
+                        gap: 1
+                      }}
+                    >
+                      <LinkIcon color="action" /> <strong>References:</strong>{" "}
+                      {qa.references.join(", ")}
+                    </Typography>
+                  )}
+                  {qa.tags?.length > 0 && (
+                    <Box
+                      sx={{
+                        mt: 1,
+                        display: "flex",
+                        alignItems: "center",
+                        flexWrap: "wrap",
+                        gap: 1
+                      }}
+                    >
+                      <LabelIcon color="action" />
+                      {qa.tags.map((tag, idx) => (
+                        <Box
+                          key={idx}
+                          sx={{
+                            px: 1.5,
+                            py: 0.5,
+                            bgcolor: "primary.light",
+                            borderRadius: 1,
+                            fontSize: "0.875rem",
+                            fontWeight: 500
+                          }}
+                        >
+                          {tag}
+                        </Box>
+                      ))}
+                    </Box>
+                  )}
                 </Box>
-                <IconButton
-                  onClick={() => handleOpenModal(qa, index)}
-                  sx={{ mt: 1 }}
-                >
-                  <EditIcon />
-                </IconButton>
+                <Box display="flex" alignItems="center">
+                  <IconButton
+                    onClick={() => handleOpenModal(qa, index)}
+                    sx={{
+                      color: "#1976d2",
+                      "&:hover": { bgcolor: "#e3f2fd" },
+                      mr: 1
+                    }}
+                  >
+                    <EditIcon />
+                  </IconButton>
+                  <IconButton
+                    sx={{ color: "#f44336", "&:hover": { bgcolor: "#ffebee" } }}
+                  >
+                    <DeleteIcon />
+                  </IconButton>
+                </Box>
               </Box>
             </Box>
           ))
         )}
-
-        <Button
-          variant="contained"
-          color="primary"
-          fullWidth
-          onClick={() => handleOpenModal()}
-          sx={{ mt: 2 }}
-        >
-          Add New Q&A
-        </Button>
       </Box>
 
-      {/* Modal for Editing & Adding */}
       <Modal
         open={openModal}
         onClose={handleCloseModal}
@@ -129,13 +246,13 @@ const QAGenerator = ({document, onQaListChange}) => {
             p: 4,
             bgcolor: "white",
             boxShadow: 3,
-            borderRadius: 2,
-            width: 700,
-            maxHeight: "90vh", // Set max height for scroll
+            borderRadius: 3,
+            width: 600,
+            maxHeight: "90vh",
             overflowY: "auto"
           }}
         >
-          <Typography variant="h6">
+          <Typography variant="h6" sx={{ fontWeight: 600, mb: 2 }}>
             {editIndex !== null ? "Edit Q&A" : "Add New Q&A"}
           </Typography>
           <TextField
@@ -155,8 +272,7 @@ const QAGenerator = ({document, onQaListChange}) => {
               setCurrentQA({ ...currentQA, answer: e.target.value })
             }
             multiline
-            minRows={3}
-            maxRows={100}
+            minRows={4}
             margin="normal"
           />
           <TextField
@@ -164,16 +280,11 @@ const QAGenerator = ({document, onQaListChange}) => {
             label="Page Number"
             type="number"
             value={currentQA.pageNumber}
-            onChange={(e) => {
-              setCurrentQA({ ...currentQA, pageNumber: e.target.value });              
-            }}
+            onChange={(e) =>
+              setCurrentQA({ ...currentQA, pageNumber: e.target.value })
+            }
             margin="normal"
-            inputProps={{
-              min: 1,
-              max: 100
-            }}
           />
-
           <TextField
             fullWidth
             label="Page Section"
@@ -183,29 +294,18 @@ const QAGenerator = ({document, onQaListChange}) => {
             }
             margin="normal"
           />
-          <TextField
-            fullWidth
-            label="References"
-            value={currentQA.references}
-            onChange={(e) =>
-              setCurrentQA({
-                ...currentQA,
-                references: e.target.value.split(",")
-              })
-            }
-            margin="normal"
+          <TagInput
+            tagsArray={currentQA.tags}
+            onTagsChange={handleTagsChange}
           />
-
-          <TagInput tagsArray={currentQA.tags} onTagsChange={handleTagsChange}/>
-
           <Button
             variant="contained"
-            color="success"
+            color="primary"
             fullWidth
             onClick={handleSaveQA}
             sx={{ mt: 2 }}
           >
-            {editIndex !== null ? "Save Changes" : "Add Q&A"}
+            Save Q&A
           </Button>
           <Button
             variant="outlined"
@@ -218,7 +318,7 @@ const QAGenerator = ({document, onQaListChange}) => {
           </Button>
         </Box>
       </Modal>
-    </Grid>
+    </Box>
   );
 };
 

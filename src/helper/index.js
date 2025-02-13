@@ -9,39 +9,29 @@ export const generateRealQA = (qnaData) => {
   }));
 };
 
+const metaData = [
+  "Khoj Q&A Generator",
+  "Generate Q&A based on uploaded documents",
+  "(Version: 0.1.0)"
+];
+
 export const transformDataForApi = (inputData) => {
   return {
     summary: inputData.summary,
-    usecase_id: "9b0adf39-2b8b-4679-a0fd-b34803b6b6e2",
+    usecase_id: "f8a57d3a-d0fd-4261-b9d3-b1b02c4b54c1",
     doc_name: inputData.documentName,
-    doc_url: "http://example.com/abc.pdf",
+    doc_url: inputData.pageLink,
     type_of_doc: "main-cms",
-    doc_metadata: {
-      tag: "a",
-      tag: "b",
-      tag: "c"
-    },
-    user_id: "f8a57d3a-d0fd-4261-b9d3-b1b02c4b54c1",
+    doc_metadata: metaData?.join(", ") || "",
+    user_id: "9b0adf39-2b8b-4679-a0fd-b34803b6b6e2",
     questions: inputData.qaList.map((qa) => ({
       question: qa.question,
       answer: qa.answer,
-      is_llm_generated: true,
+      is_llm_generated: qa.is_llm_generated,
       section: qa.pageSection,
       page_no: qa.pageNumber,
-      qna_metadata: {
-      info: qa.tags?.join(", ") || ""
-        // "tags": [
-        //         "RDG Account",
-        //         "Government Securities",
-        //         "Primary Market",
-        //         "Secondary Market"
-        //     ]
-      },
+      qna_metadata: qa.tags?.join(", ") || "",
       deep_links: qa.references?.length ? { url: qa.references?.[0] } : {}
-      // deep_links: {
-      //   url: 'a',
-      //   url: 'b'
-      // }
     })),
     storage_path: inputData.fileUploadResponse?.object_path || "",
     mime_type: inputData.fileUploadResponse?.mimeType || "application/pdf"

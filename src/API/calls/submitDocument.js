@@ -3,7 +3,8 @@ import { transformDataForApi } from "../../helper";
 
 export const submitDocument = async (document) => {  
   const payload = document && transformDataForApi(document);
-  const endpoint = "/insert_doc_with_qna";
+  const endpoint = "database/insert_doc_with_qna";
 
+  console.log('***************', payload)
   return apiRequest(endpoint, "POST", payload);
 };
