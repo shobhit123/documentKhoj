@@ -9,7 +9,8 @@ import {
   Box,
   IconButton,
   Collapse,
-  Grid
+  Grid,
+  Backdrop
 } from "@mui/material";
 import {
   Description as DocumentIcon,
@@ -112,30 +113,44 @@ const DocumentUpload = () => {
   };
 
   const handleOnSubmit = async () => {
-    const response = await submitDocument(updatedDocument); //ToDo: Show loader
-    console.log('response',response)
-    if (response?.record_id) {
-      setDocumentData({
-        documentName: "",
-        pageLink: "",
-        summary: "",
-        numQA: "",
-        tags: [],
-        fileUploadResponse: null,
-        isDocumentUploaded: false,
-        qaList: []
-      });
-      alert(
-        "Document has been submitted successfully to the server based on your feedback"
-      );
-    } else {
-      alert("Something went Wrong to update document")
+    setLoading(true); // Show loader
+
+    try {
+      const response = await submitDocument(updatedDocument);
+      console.log("response", response);
+
+      if (response?.record_id) {
+        setDocumentData({
+          documentName: "",
+          pageLink: "",
+          summary: "",
+          numQA: "",
+          tags: [],
+          fileUploadResponse: null,
+          isDocumentUploaded: false,
+          qaList: []
+        });
+
+        alert(STRINGS.document_submitted_successfully);
+        window.location.reload(); // Reload page on success
+      } else {
+        alert(STRINGS.something_went_wrong_to_upload);
+      }
+    } catch (error) {
+      alert(STRINGS.something_went_wrong_to_upload);
+    } finally {
+      setLoading(false); // Hide loader after submission
     }
   };
 
   return (
     <Box container spacing={4} sx={{ p: 3 }}>
       {/* Collapsible Header */}
+      {loading && (
+        <Backdrop open={loading} sx={{ color: "#fff", zIndex: 9999 }}>
+          <CircularProgress color="inherit" />
+        </Backdrop>
+      )}
       <Box
         sx={{
           display: "flex",
@@ -198,13 +213,13 @@ const DocumentUpload = () => {
             {STRINGS.documentDetails}
           </Typography>
 
-          <Grid container spacing={3} style={{ alignItems: "center" }}>
+          <Grid container spacing={1} style={{ alignItems: "center" }}>
             {/* Left Section: Other Inputs */}
             <Grid item xs={12} md={6}>
               <TextField
                 fullWidth
                 label={STRINGS.fileName}
-                placeholder="Enter file name here"
+                placeholder={STRINGS.fileNamePlaceholder}
                 value={documentData.documentName}
                 onChange={(e) => handleChange("documentName", e.target.value)}
                 margin="dense"
@@ -221,7 +236,7 @@ const DocumentUpload = () => {
                 fullWidth
                 label={STRINGS.pageLink}
                 value={documentData.pageLink}
-                placeholder="Enter page link related to this file else input or https://www.hdfcbank.com"
+                placeholder={STRINGS.pageLinkPlaceHolder}
                 onChange={(e) => handleChange("pageLink", e.target.value)}
                 margin="dense"
                 InputProps={{
@@ -237,7 +252,7 @@ const DocumentUpload = () => {
                 fullWidth
                 label={STRINGS.summary}
                 value={documentData.summary}
-                placeholder="The document provides recommendations for improving services at HDFC Bank based on research findings"
+                placeholder={STRINGS.summaryPlaceHolder}
                 onChange={(e) => handleChange("summary", e.target.value)}
                 margin="dense"
                 multiline
@@ -258,7 +273,7 @@ const DocumentUpload = () => {
                 type="number"
                 label={STRINGS.numQA}
                 value={documentData.numQA}
-                placeholder="Number of questions required for selected document"
+                placeholder={STRINGS.questionPlaceHolder}
                 onChange={(e) => {
                   const value = parseInt(e.target.value, 10);
                   if (value >= 1 && value <= 100) {

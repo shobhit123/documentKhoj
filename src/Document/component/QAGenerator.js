@@ -1,8 +1,7 @@
 import React, { useState } from "react";
 import {
   Box,
-  Button,
-  Grid,
+  Button,  
   IconButton,
   TextField,
   Typography,
@@ -20,6 +19,7 @@ import {
   QuestionAnswer
 } from "@mui/icons-material";
 import TagInput from "./TagInput";
+import { STRINGS } from "../common/strings";
 
 const QAGenerator = ({ document, onQaListChange }) => {
   const [qaList, setQaList] = useState(document?.qaList || []);
@@ -55,7 +55,7 @@ const QAGenerator = ({ document, onQaListChange }) => {
 
   const handleSaveQA = () => {
     if (!currentQA.question || !currentQA.answer) {
-      alert("Question and Answer are required!");
+      alert(STRINGS.questionAnswerRequired);
       return;
     }
 
@@ -68,10 +68,31 @@ const QAGenerator = ({ document, onQaListChange }) => {
     onQaListChange(false, [], updatedList);
     handleCloseModal();
   };
-  
+
   const handleTagsChange = (newTags) => {
-    onQaListChange(true, newTags, []);
+    setCurrentQA((prevQA) => ({
+      ...prevQA,
+      tags: newTags
+    }));
+  
+    if (editIndex !== null) {
+      const updatedList = [...qaList];
+      updatedList[editIndex] = { ...updatedList[editIndex], tags: newTags };
+  
+      setQaList(updatedList);
+    }
   };
+  
+
+  const handleDeleteQA = (index) => {
+    const confirmDelete = window.confirm(STRINGS.sureToDelete);
+    if (confirmDelete) {
+      const updatedList = qaList.filter((_, i) => i !== index);
+      setQaList(updatedList);
+      onQaListChange(false, [], updatedList);
+    }
+  };
+
 
   return (
     <Box item xs={12} md={12}>
@@ -89,7 +110,7 @@ const QAGenerator = ({ document, onQaListChange }) => {
           }}
         >
           <Typography variant="h6" fontWeight={600} color="primary">
-            Q&A Generator
+            {STRINGS.title}
           </Typography>
           <Button
             variant="contained"
@@ -102,7 +123,7 @@ const QAGenerator = ({ document, onQaListChange }) => {
               minWidth: "auto"
             }}
           >
-            Add New Q&A
+            {STRINGS.addNewQnA_action}
           </Button>
         </Box>
 
@@ -112,7 +133,7 @@ const QAGenerator = ({ document, onQaListChange }) => {
             color="textSecondary"
             sx={{ fontStyle: "italic" }}
           >
-            No Q&A generated yet. Click below to add a new Q&A.
+            {STRINGS.noQAgenerated}
           </Typography>
         ) : (
           qaList.map((qa, index) => (
@@ -152,7 +173,7 @@ const QAGenerator = ({ document, onQaListChange }) => {
                     }}
                   >
                     <QuestionAnswer color="action" />
-                    <strong>Answer:</strong> {qa.answer}
+                    <strong>{STRINGS.answerLabel}</strong> {qa.answer}
                   </Typography>
                   {qa.pageSection && (
                     <Typography
@@ -166,7 +187,7 @@ const QAGenerator = ({ document, onQaListChange }) => {
                       }}
                     >
                       <DescriptionIcon color="action" />{" "}
-                      <strong>Section:</strong> {qa.pageSection}
+                      <strong>{STRINGS.sectionLabel}</strong> {qa.pageSection}
                     </Typography>
                   )}
                   {qa.references?.length > 0 && (
@@ -180,7 +201,7 @@ const QAGenerator = ({ document, onQaListChange }) => {
                         gap: 1
                       }}
                     >
-                      <LinkIcon color="action" /> <strong>References:</strong>{" "}
+                      <LinkIcon color="action" /> <strong>{STRINGS.referencesLabel}</strong>{" "}
                       {qa.references.join(", ")}
                     </Typography>
                   )}
@@ -223,8 +244,9 @@ const QAGenerator = ({ document, onQaListChange }) => {
                     }}
                   >
                     <EditIcon />
-                  </IconButton>
+                  </IconButton>                
                   <IconButton
+                    onClick={() => handleDeleteQA(index)}
                     sx={{ color: "#f44336", "&:hover": { bgcolor: "#ffebee" } }}
                   >
                     <DeleteIcon />
@@ -253,11 +275,11 @@ const QAGenerator = ({ document, onQaListChange }) => {
           }}
         >
           <Typography variant="h6" sx={{ fontWeight: 600, mb: 2 }}>
-            {editIndex !== null ? "Edit Q&A" : "Add New Q&A"}
+            {editIndex !== null ? STRINGS.editQA : STRINGS.addQA}
           </Typography>
           <TextField
             fullWidth
-            label="Question"
+            label={STRINGS.questionLabel}
             value={currentQA.question}
             onChange={(e) =>
               setCurrentQA({ ...currentQA, question: e.target.value })
@@ -266,7 +288,7 @@ const QAGenerator = ({ document, onQaListChange }) => {
           />
           <TextField
             fullWidth
-            label="Answer"
+            label={STRINGS.answer}
             value={currentQA.answer}
             onChange={(e) =>
               setCurrentQA({ ...currentQA, answer: e.target.value })
@@ -277,7 +299,7 @@ const QAGenerator = ({ document, onQaListChange }) => {
           />
           <TextField
             fullWidth
-            label="Page Number"
+            label={STRINGS.pageNumber}
             type="number"
             value={currentQA.pageNumber}
             onChange={(e) =>
@@ -287,7 +309,7 @@ const QAGenerator = ({ document, onQaListChange }) => {
           />
           <TextField
             fullWidth
-            label="Page Section"
+            label={STRINGS.pageSection}
             value={currentQA.pageSection}
             onChange={(e) =>
               setCurrentQA({ ...currentQA, pageSection: e.target.value })
@@ -305,7 +327,7 @@ const QAGenerator = ({ document, onQaListChange }) => {
             onClick={handleSaveQA}
             sx={{ mt: 2 }}
           >
-            Save Q&A
+            {STRINGS.saveQA}
           </Button>
           <Button
             variant="outlined"
@@ -314,7 +336,7 @@ const QAGenerator = ({ document, onQaListChange }) => {
             onClick={handleCloseModal}
             sx={{ mt: 1 }}
           >
-            Cancel
+            {STRINGS.cancel}
           </Button>
         </Box>
       </Modal>

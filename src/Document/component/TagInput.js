@@ -1,19 +1,30 @@
 import React, { useState } from "react";
 import { TextField, Chip, Box, InputAdornment } from "@mui/material";
 import { Label } from "@mui/icons-material";
+import { STRINGS } from "../common/strings";
 
 const TagInput = ({ tagsArray, onTagsChange }) => {
   const [tags, setTags] = useState(tagsArray || []);
   const [inputValue, setInputValue] = useState("");
 
+
   const handleAddTag = (event) => {
     if (event.key === "Enter" && inputValue.trim()) {
       event.preventDefault();
+  
+      // Allow only alphanumeric characters and spaces
+      const regex = /^[a-zA-Z0-9 ]+$/;
+      if (!regex.test(inputValue.trim())) {
+        alert(STRINGS.special_characters_not_Allowed);
+        return;
+      }
+  
       setTags([...tags, inputValue.trim()]);
       onTagsChange([...tags, inputValue.trim()]);
       setInputValue(""); // Clear input after adding tag
     }
   };
+  
 
   const handleDeleteTag = (tagToDelete) => {
     const updatedTags = tags?.filter((tag) => tag !== tagToDelete);
@@ -28,9 +39,13 @@ const TagInput = ({ tagsArray, onTagsChange }) => {
         label="Add Tags"
         variant="outlined"
         value={inputValue}
-        onChange={(e) => setInputValue(e.target.value)}
+        onChange={(e) => {
+          if (e.target.value.length <= 100) {
+            setInputValue(e.target.value);
+          }
+        }}
         onKeyDown={handleAddTag}
-        placeholder="Type and press Enter to add a tag"
+        placeholder={STRINGS.tagPlaceHolder}
         margin="normal"
         InputProps={{
           startAdornment: (

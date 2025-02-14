@@ -8,32 +8,51 @@ export const generateRealQA = (qnaData) => {
     tags: item.tags || [`Tag ${index + 1}`]
   }));
 };
-
 const metaData = [
   "Khoj Q&A Generator",
   "Generate Q&A based on uploaded documents",
   "(Version: 0.1.0)"
 ];
 
-export const transformDataForApi = (inputData) => {
+export const transformDataForApi = (inputData = {}) => {
+  const {
+    summary = "",
+    documentName = "",
+    pageLink = "",    
+    qaList = [],
+    fileUploadResponse = {}
+  } = inputData;
+
   return {
-    summary: inputData.summary,
+    summary,
     usecase_id: "f8a57d3a-d0fd-4261-b9d3-b1b02c4b54c1",
-    doc_name: inputData.documentName,
-    doc_url: inputData.pageLink,
+    doc_name: documentName,
+    doc_url: pageLink,
     type_of_doc: "main-cms",
-    doc_metadata: metaData?.join(", ") || "",
+    doc_metadata: metaData,
     user_id: "9b0adf39-2b8b-4679-a0fd-b34803b6b6e2",
-    questions: inputData.qaList.map((qa) => ({
-      question: qa.question,
-      answer: qa.answer,
-      is_llm_generated: qa.is_llm_generated,
-      section: qa.pageSection,
-      page_no: qa.pageNumber,
-      qna_metadata: qa.tags?.join(", ") || "",
-      deep_links: qa.references?.length ? { url: qa.references?.[0] } : {}
-    })),
-    storage_path: inputData.fileUploadResponse?.object_path || "",
-    mime_type: inputData.fileUploadResponse?.mimeType || "application/pdf"
+    questions: qaList.map((qa = {}) => {
+      const {
+        question = "",
+        answer = "",
+        is_llm_generated = false,
+        pageSection = "",
+        pageNumber = "",
+        tags = [],
+        references = []
+      } = qa;
+
+      return {
+        question,
+        answer,
+        is_llm_generated,
+        section: pageSection,
+        page_no: pageNumber,
+        qna_metadata: tags,        
+        deep_links: references.length > 0 ? references : []
+      };
+    }),
+    storage_path: fileUploadResponse.object_path || "",
+    mime_type: fileUploadResponse.mimeType || "application/pdf"
   };
 };
