@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import {
   Box,
-  Button,  
+  Button,
   IconButton,
   TextField,
   Typography,
@@ -16,12 +16,22 @@ import {
   Description as DescriptionIcon,
   Link as LinkIcon,
   Label as LabelIcon,
-  QuestionAnswer
+  QuestionAnswer,
+  Edit,
+  Refresh,
+  Add,
+  RestartAlt,
+  QuestionMark
 } from "@mui/icons-material";
 import TagInput from "./TagInput";
-import { STRINGS } from "../common/strings";
 
-const QAGenerator = ({ document, onQaListChange }) => {
+const QAGenerator = ({
+  document,
+  onQaListChange,
+  STRINGS,
+  onEditDetails,
+  onReGenerateQA
+}) => {
   const [qaList, setQaList] = useState(document?.qaList || []);
   const [openModal, setOpenModal] = useState(false);
   const [editIndex, setEditIndex] = useState(null);
@@ -32,7 +42,8 @@ const QAGenerator = ({ document, onQaListChange }) => {
     pageSection: "",
     references: "",
     is_llm_generated: false,
-    tags: []
+    tags: [],
+    question_guidance: ""
   });
 
   const handleOpenModal = (qa = null, index = null) => {
@@ -45,7 +56,8 @@ const QAGenerator = ({ document, onQaListChange }) => {
         pageSection: "",
         references: "",
         is_llm_generated: false,
-        tags: []
+        tags: [],
+        question_guidance: ""
       }
     );
     setOpenModal(true);
@@ -74,15 +86,14 @@ const QAGenerator = ({ document, onQaListChange }) => {
       ...prevQA,
       tags: newTags
     }));
-  
+
     if (editIndex !== null) {
       const updatedList = [...qaList];
       updatedList[editIndex] = { ...updatedList[editIndex], tags: newTags };
-  
+
       setQaList(updatedList);
     }
   };
-  
 
   const handleDeleteQA = (index) => {
     const confirmDelete = window.confirm(STRINGS.sureToDelete);
@@ -92,7 +103,6 @@ const QAGenerator = ({ document, onQaListChange }) => {
       onQaListChange(false, [], updatedList);
     }
   };
-
 
   return (
     <Box item xs={12} md={12}>
@@ -112,19 +122,62 @@ const QAGenerator = ({ document, onQaListChange }) => {
           <Typography variant="h6" fontWeight={600} color="primary">
             {STRINGS.title}
           </Typography>
-          <Button
-            variant="contained"
-            color="primary"
-            startIcon={<AddCircleIcon />}
-            onClick={() => handleOpenModal()}
-            sx={{
-              padding: "6px 12px",
-              fontSize: "14px",
-              minWidth: "auto"
-            }}
-          >
-            {STRINGS.addNewQnA_action}
-          </Button>
+
+          <Box display="flex" flexDirection="row" gap={2}>
+            <Button
+              variant="contained"
+              color="primary"
+              startIcon={<RestartAlt />}
+              onClick={() => {
+                const userConfirmed = window.confirm(
+                  STRINGS.confirmation_restart_journey
+                );
+                if (userConfirmed) {
+                  window.location.reload();
+                }
+              }}
+            />
+
+            <Button
+              variant="contained"
+              color="primary"
+              startIcon={<Edit />}
+              onClick={() => {
+                const userConfirmed = window.confirm(
+                  STRINGS.confirmation_EditJourney
+                );
+                if (userConfirmed) {
+                  onEditDetails();
+                }
+              }}
+              sx={{
+                padding: "6px 12px",
+                fontSize: "14px",
+                minWidth: "auto"
+              }}
+            />
+
+            <Button
+              variant="contained"
+              color="primary"
+              startIcon={<Refresh />}
+              onClick={() => {
+                const userConfirmed = window.confirm(
+                  STRINGS.confirmation_generateJourney
+                );
+                if (userConfirmed) {
+                  onReGenerateQA();
+                }
+              }}
+            />
+
+            <Button
+              variant="contained"
+              color="primary"
+              startIcon={<Add />}
+              onClick={() => handleOpenModal()}
+            />
+          </Box>
         </Box>
 
         {qaList.length === 0 ? (
@@ -151,16 +204,18 @@ const QAGenerator = ({ document, onQaListChange }) => {
               <Box display="flex" justifyContent="space-between">
                 <Box>
                   <Typography
-                    variant="h6"
+                    variant="body2"
                     sx={{
-                      fontWeight: 600,
+                      fontWeight: 400,
                       display: "flex",
                       alignItems: "center",
+                      color: "text.secondary",
                       gap: 1
                     }}
                   >
-                    <strong>Q{index + 1}:</strong>
-                    {qa.question}
+                    <QuestionMark color="action" />
+                    <strong>{STRINGS.questionLabel}</strong>{" "}
+                    <strong>{qa.question}</strong>
                   </Typography>
                   <Typography
                     variant="body2"
@@ -201,7 +256,8 @@ const QAGenerator = ({ document, onQaListChange }) => {
                         gap: 1
                       }}
                     >
-                      <LinkIcon color="action" /> <strong>{STRINGS.referencesLabel}</strong>{" "}
+                      <LinkIcon color="action" />{" "}
+                      <strong>{STRINGS.referencesLabel}</strong>{" "}
                       {qa.references.join(", ")}
                     </Typography>
                   )}
@@ -244,7 +300,7 @@ const QAGenerator = ({ document, onQaListChange }) => {
                     }}
                   >
                     <EditIcon />
-                  </IconButton>                
+                  </IconButton>
                   <IconButton
                     onClick={() => handleDeleteQA(index)}
                     sx={{ color: "#f44336", "&:hover": { bgcolor: "#ffebee" } }}
@@ -319,6 +375,7 @@ const QAGenerator = ({ document, onQaListChange }) => {
           <TagInput
             tagsArray={currentQA.tags}
             onTagsChange={handleTagsChange}
+            STRINGS={STRINGS}
           />
           <Button
             variant="contained"

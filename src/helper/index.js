@@ -18,9 +18,10 @@ export const transformDataForApi = (inputData = {}) => {
   const {
     summary = "",
     documentName = "",
-    pageLink = "",    
+    pageLink = "",
     qaList = [],
-    fileUploadResponse = {}
+    fileUploadResponse = {},
+    question_guidance = ""
   } = inputData;
 
   return {
@@ -29,6 +30,7 @@ export const transformDataForApi = (inputData = {}) => {
     doc_name: documentName,
     doc_url: pageLink,
     type_of_doc: "main-cms",
+    question_guidance: question_guidance,
     doc_metadata: metaData,
     user_id: "9b0adf39-2b8b-4679-a0fd-b34803b6b6e2",
     questions: qaList.map((qa = {}) => {
@@ -48,7 +50,7 @@ export const transformDataForApi = (inputData = {}) => {
         is_llm_generated,
         section: pageSection,
         page_no: pageNumber,
-        qna_metadata: tags,        
+        qna_metadata: tags,
         deep_links: references.length > 0 ? references : []
       };
     }),

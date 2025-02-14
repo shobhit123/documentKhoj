@@ -10,7 +10,8 @@ import {
   IconButton,
   Collapse,
   Grid,
-  Backdrop
+  Backdrop,
+  Switch
 } from "@mui/material";
 import {
   Description as DocumentIcon,
@@ -21,14 +22,15 @@ import {
   Summarize,
   Quiz,
   Pages,
-  Description
+  Description,
+  ModelTraining
 } from "@mui/icons-material";
 import TagInput from "./component/TagInput";
 import UploadDocument from "./component/UploadDocument";
 import QAGenerator from "./component/QAGenerator";
 import { generateRealQA } from "../helper";
 import { generateQA } from "../API/calls/generateQA";
-import { STRINGS } from "./common/strings";
+import { getStrings } from "./common/strings";
 import { submitDocument } from "../API/calls/submitDocument";
 
 const DocumentUpload = () => {
@@ -40,13 +42,25 @@ const DocumentUpload = () => {
     tags: [],
     fileUploadResponse: null,
     isDocumentUploaded: false,
-    qaList: []
+    qaList: [],
+    question_guidance: ""
   });
 
   const [updatedDocument, setUpdatedDocument] = useState(documentData || {});
   const [loading, setLoading] = useState(false);
   const [expanded, setExpanded] = useState(true);
   const [showPDF, setShowPDF] = useState(false);
+  const [isLocale, setIsLocale] = useState("en");
+  const [isToggleOn, setIsToggleOff] = useState(false);
+  const toggleLanguage = () => {
+    if (isLocale === "en") {
+      setIsLocale("hi");
+    } else {
+      setIsLocale("en");
+    }
+    setIsToggleOff(!isToggleOn);
+  };
+  const STRINGS = getStrings(isLocale);
 
   const handleUploadSuccess = (response, fileType) => {
     setDocumentData((prevData) => ({
@@ -88,13 +102,29 @@ const DocumentUpload = () => {
   };
 
   const handleGenerateQA = async () => {
-    const { documentName, summary, pageLink, fileUploadResponse } =
-      documentData;
-    if (!documentName || !summary || !pageLink) {
-      alert(STRINGS.formValidationMessage);
+    const {
+      documentName,
+      summary,
+      pageLink,
+      fileUploadResponse,
+      question_guidance
+    } = documentData;
+    
+    let missingFields = [];
+
+    // Check for missing fields
+    if (!documentName) missingFields.push("Document Name");
+    if (!summary) missingFields.push("Summary");
+    if (!pageLink) missingFields.push("Reference Link");
+    if (!question_guidance) missingFields.push("Question Guidance");
+
+    if (missingFields.length > 0) {
+      const missingFieldsText = missingFields.join(", ");
+      alert(
+        `${STRINGS.formValidationMessage}: ${missingFieldsText} are required.`
+      );
       return;
     }
-
     setLoading(true);
     const response = await generateQA(
       fileUploadResponse?.object_path,
@@ -117,7 +147,6 @@ const DocumentUpload = () => {
 
     try {
       const response = await submitDocument(updatedDocument);
-      console.log("response", response);
 
       if (response?.record_id) {
         setDocumentData({
@@ -128,7 +157,8 @@ const DocumentUpload = () => {
           tags: [],
           fileUploadResponse: null,
           isDocumentUploaded: false,
-          qaList: []
+          qaList: [],
+          question_guidance: ""
         });
 
         alert(STRINGS.document_submitted_successfully);
@@ -149,6 +179,9 @@ const DocumentUpload = () => {
       {loading && (
         <Backdrop open={loading} sx={{ color: "#fff", zIndex: 9999 }}>
           <CircularProgress color="inherit" />
+          <Typography sx={{ ml: 2, color: "#fff" }}>
+            {STRINGS.processing_request}
+          </Typography>
         </Backdrop>
       )}
       <Box
@@ -165,12 +198,14 @@ const DocumentUpload = () => {
         <Typography variant="h6" fontWeight={600} color="primary">
           {STRINGS.title}
         </Typography>
-        <Box>
-          {documentData.fileUploadResponse?.object_path && !expanded && (
-            <IconButton onClick={() => setShowPDF(!showPDF)} color="primary">
-              <PdfIcon />
-            </IconButton>
-          )}
+
+        <Box display="flex">
+          <Box display="flex" alignItems="center">
+            <Typography variant="body1" fontWeight={100} color="primary">
+              {STRINGS.selectedLanguage}
+            </Typography>
+            <Switch checked={isToggleOn} onChange={toggleLanguage} />
+          </Box>          
           {documentData?.qaList?.length > 0 && (
             <IconButton
               onClick={() => {
@@ -184,26 +219,6 @@ const DocumentUpload = () => {
           )}
         </Box>
       </Box>
-
-      {/* PDF Viewer (Toggles on button click) */}
-      {showPDF && !expanded && (
-        <Box sx={{ mt: 2, p: 2, border: "1px solid #ddd", borderRadius: 2 }}>
-          <iframe
-            src={documentData.fileUploadResponse?.object_path}
-            title="PDF Viewer"
-            width="100%"
-            height="400px"
-          />
-          <Button
-            variant="outlined"
-            fullWidth
-            sx={{ mt: 1 }}
-            onClick={() => setShowPDF(false)}
-          >
-            Close PDF
-          </Button>
-        </Box>
-      )}
 
       {/* Collapsible Document Details Section */}
       <Collapse in={expanded}>
@@ -266,7 +281,7 @@ const DocumentUpload = () => {
                 }}
               />
 
-              <TagInput onTagsChange={handleTagsChange} />
+              <TagInput onTagsChange={handleTagsChange} STRINGS={STRINGS} />
 
               <TextField
                 fullWidth
@@ -285,6 +300,26 @@ const DocumentUpload = () => {
                   startAdornment: (
                     <InputAdornment position="start">
                       <Quiz />
+                    </InputAdornment>
+                  )
+                }}
+              />
+
+              <TextField
+                fullWidth
+                label={STRINGS.question_guidance}
+                value={documentData.question_guidance} 
+                placeholder={STRINGS.question_guidancePlaceHolder}
+                onChange={(e) =>
+                  handleChange("question_guidance", e.target.value)
+                }
+                margin="dense"
+                multiline
+                minRows={3}
+                InputProps={{
+                  startAdornment: (
+                    <InputAdornment position="start">
+                      <ModelTraining />
                     </InputAdornment>
                   )
                 }}
@@ -313,7 +348,10 @@ const DocumentUpload = () => {
 
             {/* Right Section: Upload Document */}
             <Grid item xs={12} md={6}>
-              <UploadDocument onUploadSuccess={handleUploadSuccess} />
+              <UploadDocument
+                onUploadSuccess={handleUploadSuccess}
+                STRINGS={STRINGS}
+              />
             </Grid>
           </Grid>
         </Card>
@@ -325,6 +363,9 @@ const DocumentUpload = () => {
           <QAGenerator
             document={documentData}
             onQaListChange={handleQAListChange}
+            STRINGS={STRINGS}
+            onEditDetails={()=>setExpanded(!expanded)}
+            onReGenerateQA={handleGenerateQA}
           />
         </Box>
       )}

@@ -3,9 +3,8 @@ import { Box, Button, CircularProgress, Typography } from "@mui/material";
 import CloudUploadIcon from "@mui/icons-material/CloudUpload";
 import InsertDriveFileIcon from "@mui/icons-material/InsertDriveFile";
 import { uploadFileService } from "../../API/calls/uploadService";
-import { STRINGS } from "../common/strings";
 
-const UploadDocument = ({ onUploadSuccess }) => {
+const UploadDocument = ({ onUploadSuccess , STRINGS}) => {
   const [file, setFile] = useState(null);
   const [uploadProgress, setUploadProgress] = useState(0);
   const [uploading, setUploading] = useState(false);

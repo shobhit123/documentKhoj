@@ -1,9 +1,8 @@
 import React, { useState } from "react";
 import { TextField, Chip, Box, InputAdornment } from "@mui/material";
 import { Label } from "@mui/icons-material";
-import { STRINGS } from "../common/strings";
 
-const TagInput = ({ tagsArray, onTagsChange }) => {
+const TagInput = ({ tagsArray, onTagsChange, STRINGS }) => {
   const [tags, setTags] = useState(tagsArray || []);
   const [inputValue, setInputValue] = useState("");
 
