@@ -1,0 +1,392 @@
+import React, { useState } from "react";
+import {
+  TextField,
+  Button,
+  Typography,
+  CircularProgress,
+  Card,
+  InputAdornment,
+  Box,
+  IconButton,
+  Collapse,
+  Grid,
+  Backdrop,
+  Switch
+} from "@mui/material";
+import {
+  Description as DocumentIcon,
+  ExpandLess,
+  ExpandMore,
+  PictureAsPdf as PdfIcon,
+  Save as SaveIcon,
+  Summarize,
+  Quiz,
+  Pages,
+  Description,
+  ModelTraining
+} from "@mui/icons-material";
+import TagInput from "./component/TagInput";
+import UploadDocument from "./component/UploadDocument";
+import QAGenerator from "./component/QAGenerator";
+import { generateRealQA } from "../helper";
+import { generateQA } from "../API/calls/generateQA";
+import { getStrings } from "./common/strings";
+import { submitDocument } from "../API/calls/submitDocument";
+
+const DocumentUpload = () => {
+  const [documentData, setDocumentData] = useState({
+    documentName: "",
+    pageLink: "",
+    summary: "",
+    numQA: "",
+    tags: [],
+    fileUploadResponse: null,
+    isDocumentUploaded: false,
+    qaList: [],
+    question_guidance: ""
+  });
+
+  const [updatedDocument, setUpdatedDocument] = useState(documentData || {});
+  const [loading, setLoading] = useState(false);
+  const [expanded, setExpanded] = useState(true);
+  const [showPDF, setShowPDF] = useState(false);
+  const [isLocale, setIsLocale] = useState("en");
+  const [isToggleOn, setIsToggleOff] = useState(false);
+  const toggleLanguage = () => {
+    if (isLocale === "en") {
+      setIsLocale("hi");
+    } else {
+      setIsLocale("en");
+    }
+    setIsToggleOff(!isToggleOn);
+  };
+  const STRINGS = getStrings(isLocale);
+
+  const handleUploadSuccess = (response, fileType) => {
+    setDocumentData((prevData) => ({
+      ...prevData,
+      fileUploadResponse: {
+        object_path: response?.object_path,
+        mimeType: fileType
+      },
+      isDocumentUploaded: true
+    }));
+  };
+
+  const handleChange = (field, value) => {
+    setDocumentData((prevData) => ({
+      ...prevData,
+      [field]: value
+    }));
+  };
+
+  const handleTagsChange = (newTags) => {
+    setDocumentData((prevData) => ({
+      ...prevData,
+      tags: newTags
+    }));
+  };
+
+  const handleQAListChange = (isTags, newTags, qnaList) => {
+    if (isTags) {
+      setUpdatedDocument({
+        ...documentData,
+        tags: newTags
+      });
+    } else {
+      setUpdatedDocument({
+        ...documentData,
+        qaList: qnaList
+      });
+    }
+  };
+
+  const handleGenerateQA = async () => {
+    const {
+      documentName,
+      summary,
+      pageLink,
+      fileUploadResponse,
+      question_guidance
+    } = documentData;
+    
+    let missingFields = [];
+
+    // Check for missing fields
+    if (!documentName) missingFields.push("Document Name");
+    if (!summary) missingFields.push("Summary");
+    if (!pageLink) missingFields.push("Reference Link");
+    if (!question_guidance) missingFields.push("Question Guidance");
+
+    if (missingFields.length > 0) {
+      const missingFieldsText = missingFields.join(", ");
+      alert(
+        `${STRINGS.formValidationMessage}: ${missingFieldsText} are required.`
+      );
+      return;
+    }
+    setLoading(true);
+    const response = await generateQA(
+      fileUploadResponse?.object_path,
+      fileUploadResponse?.mimeType,
+      question_guidance
+    );
+    if (response?.qna_response?.length) {
+      setTimeout(() => {
+        setDocumentData((prevData) => ({
+          ...prevData,
+          qaList: generateRealQA(response.qna_response)
+        }));
+        setLoading(false);
+        setExpanded(false); // Collapse document section after generating questions
+      }, 2000);
+    }
+  };
+
+  const handleOnSubmit = async () => {
+    setLoading(true); // Show loader
+
+    try {
+      const response = await submitDocument(updatedDocument);
+
+      if (response?.record_id) {
+        setDocumentData({
+          documentName: "",
+          pageLink: "",
+          summary: "",
+          numQA: "",
+          tags: [],
+          fileUploadResponse: null,
+          isDocumentUploaded: false,
+          qaList: [],
+          question_guidance: ""
+        });
+
+        alert(STRINGS.document_submitted_successfully);
+        window.location.reload(); // Reload page on success
+      } else {
+        alert(STRINGS.something_went_wrong_to_upload);
+      }
+    } catch (error) {
+      alert(STRINGS.something_went_wrong_to_upload);
+    } finally {
+      setLoading(false); // Hide loader after submission
+    }
+  };
+
+  return (
+    <Box container spacing={4} sx={{ p: 3 }}>
+      {/* Collapsible Header */}
+      {loading && (
+        <Backdrop open={loading} sx={{ color: "#fff", zIndex: 9999 }}>
+          <CircularProgress color="inherit" />
+          <Typography sx={{ ml: 2, color: "#fff" }}>
+            {STRINGS.processing_request}
+          </Typography>
+        </Backdrop>
+      )}
+      <Box
+        sx={{
+          display: "flex",
+          justifyContent: "space-between",
+          alignItems: "center",
+          backgroundColor: "#f5f5f5",
+          borderRadius: 2,
+          px: 2,
+          py: 1
+        }}
+      >
+        <Typography variant="h6" fontWeight={600} color="primary">
+          {STRINGS.title}
+        </Typography>
+
+        <Box display="flex">
+          <Box display="flex" alignItems="center">
+            <Typography variant="body1" fontWeight={100} color="primary">
+              {STRINGS.selectedLanguage}
+            </Typography>
+            <Switch checked={isToggleOn} onChange={toggleLanguage} />
+          </Box>          
+          {documentData?.qaList?.length > 0 && (
+            <IconButton
+              onClick={() => {
+                setExpanded(!expanded);
+                setShowPDF(false);
+              }}
+              color="primary"
+            >
+              {expanded ? <ExpandLess /> : <ExpandMore />}
+            </IconButton>
+          )}
+        </Box>
+      </Box>
+
+      {/* Collapsible Document Details Section */}
+      <Collapse in={expanded}>
+        <Card sx={{ p: 3, borderRadius: 3, boxShadow: 3, mt: 2 }}>
+          <Typography variant="h6" gutterBottom color="secondary">
+            <DocumentIcon sx={{ mr: 1, verticalAlign: "middle" }} />
+            {STRINGS.documentDetails}
+          </Typography>
+
+          <Grid container spacing={1} style={{ alignItems: "center" }}>
+            {/* Left Section: Other Inputs */}
+            <Grid item xs={12} md={6}>
+              <TextField
+                fullWidth
+                label={STRINGS.fileName}
+                placeholder={STRINGS.fileNamePlaceholder}
+                value={documentData.documentName}
+                onChange={(e) => handleChange("documentName", e.target.value)}
+                margin="dense"
+                InputProps={{
+                  startAdornment: (
+                    <InputAdornment position="start">
+                      <Description />
+                    </InputAdornment>
+                  )
+                }}
+              />
+
+              <TextField
+                fullWidth
+                label={STRINGS.pageLink}
+                value={documentData.pageLink}
+                placeholder={STRINGS.pageLinkPlaceHolder}
+                onChange={(e) => handleChange("pageLink", e.target.value)}
+                margin="dense"
+                InputProps={{
+                  startAdornment: (
+                    <InputAdornment position="start">
+                      <Pages />
+                    </InputAdornment>
+                  )
+                }}
+              />
+
+              <TextField
+                fullWidth
+                label={STRINGS.summary}
+                value={documentData.summary}
+                placeholder={STRINGS.summaryPlaceHolder}
+                onChange={(e) => handleChange("summary", e.target.value)}
+                margin="dense"
+                multiline
+                minRows={3}
+                InputProps={{
+                  startAdornment: (
+                    <InputAdornment position="start">
+                      <Summarize />
+                    </InputAdornment>
+                  )
+                }}
+              />
+
+              <TagInput onTagsChange={handleTagsChange} STRINGS={STRINGS} />
+
+              <TextField
+                fullWidth
+                type="number"
+                label={STRINGS.numQA}
+                value={documentData.numQA}
+                placeholder={STRINGS.questionPlaceHolder}
+                onChange={(e) => {
+                  const value = parseInt(e.target.value, 10);
+                  if (value >= 1 && value <= 100) {
+                    handleChange("numQA", value);
+                  }
+                }}
+                margin="dense"
+                InputProps={{
+                  startAdornment: (
+                    <InputAdornment position="start">
+                      <Quiz />
+                    </InputAdornment>
+                  )
+                }}
+              />
+
+              <TextField
+                fullWidth
+                label={STRINGS.question_guidance}
+                value={documentData.question_guidance} 
+                placeholder={STRINGS.question_guidancePlaceHolder}
+                onChange={(e) =>
+                  handleChange("question_guidance", e.target.value)
+                }
+                margin="dense"
+                multiline
+                minRows={3}
+                InputProps={{
+                  startAdornment: (
+                    <InputAdornment position="start">
+                      <ModelTraining />
+                    </InputAdornment>
+                  )
+                }}
+              />
+
+              <Button
+                variant="contained"
+                fullWidth
+                disabled={loading || !documentData.isDocumentUploaded}
+                onClick={handleGenerateQA}
+                sx={{ mt: 2, py: 1 }}
+              >
+                {loading ? (
+                  <CircularProgress size={20} color="inherit" />
+                ) : (
+                  STRINGS.generateQA
+                )}
+              </Button>
+
+              {!documentData.isDocumentUploaded && (
+                <Typography variant="body2" color="error" sx={{ mt: 1 }}>
+                  {STRINGS.uploadWarning}
+                </Typography>
+              )}
+            </Grid>
+
+            {/* Right Section: Upload Document */}
+            <Grid item xs={12} md={6}>
+              <UploadDocument
+                onUploadSuccess={handleUploadSuccess}
+                STRINGS={STRINGS}
+              />
+            </Grid>
+          </Grid>
+        </Card>
+      </Collapse>
+
+      {/* QA Section */}
+      {documentData.qaList?.length > 0 && (
+        <Box sx={{ mt: 3 }}>
+          <QAGenerator
+            document={documentData}
+            onQaListChange={handleQAListChange}
+            STRINGS={STRINGS}
+            onEditDetails={()=>setExpanded(!expanded)}
+            onReGenerateQA={handleGenerateQA}
+          />
+        </Box>
+      )}
+
+      {/* Submit Button */}
+      {documentData.qaList?.length > 0 && (
+        <Box textAlign="center" sx={{ mt: 2 }}>
+          <Button
+            variant="contained"
+            fullWidth
+            onClick={handleOnSubmit}
+            sx={{ py: 1, backgroundColor: "#2e7d32" }}
+            startIcon={<SaveIcon />}
+          >
+            {STRINGS.submit}
+          </Button>
+        </Box>
+      )}
+    </Box>
+  );
+};
+
+export default DocumentUpload;
