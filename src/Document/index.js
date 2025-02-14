@@ -128,7 +128,8 @@ const DocumentUpload = () => {
     setLoading(true);
     const response = await generateQA(
       fileUploadResponse?.object_path,
-      fileUploadResponse?.mimeType
+      fileUploadResponse?.mimeType,
+      question_guidance
     );
     if (response?.qna_response?.length) {
       setTimeout(() => {
