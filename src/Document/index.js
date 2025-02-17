@@ -32,7 +32,7 @@ import { generateRealQA } from "../helper";
 import { generateQA } from "../API/calls/generateQA";
 import { getStrings } from "./common/strings";
 import { submitDocument } from "../API/calls/submitDocument";
-// import { mockQAList } from './QAMOCKLIST';
+import { mockQAList } from './QAMOCKLIST';
 
 const DocumentUpload = () => {
   const [documentData, setDocumentData] = useState({
@@ -90,6 +90,22 @@ const DocumentUpload = () => {
     }));
   };
 
+  // const handleQAListChange = (type, newTags, qnaList) => {
+  //   if (type === 'TAG') {
+  //     setUpdatedDocument({
+  //       ...documentData,
+  //       tags: newTags
+  //     });
+  //   } else if (type === 'REF') {
+
+  //   }
+  //    else {
+  //     setUpdatedDocument({
+  //       ...documentData,
+  //       qaList: qnaList
+  //     });
+  //   }
+  // };
   const handleQAListChange = (isTags, newTags, qnaList) => {
     if (isTags) {
       setUpdatedDocument({

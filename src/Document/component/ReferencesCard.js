@@ -1,57 +1,33 @@
-import React, { useState } from "react";
-import { TextField, Button, Box } from "@mui/material";
+import React from "react";
+import { Button, Box, Typography } from "@mui/material";
 
-const STRINGS = {
-  referencesLabel: "Add Reference",
-};
-
-const ReferencesCard = ({ qa, index, qaList, setQaList }) => {
-  const [newReference, setNewReference] = useState("");
-
-  // Handle adding a new reference
-  const handleAddReference = () => {
-    if (newReference.trim() === "") return;
-
-    const updatedList = [...qaList];
-    updatedList[index].references = [...(qa.references || []), newReference];
-    setQaList(updatedList);
-    setNewReference("");
-  };
-
-  // Handle clicking a reference button
+const ReferencesCard = ({ index, reference }) => {
   const handleReferenceClick = (link) => {
-    window.open(link, "_blank"); // Open link in a new tab
+    if (link.startsWith("http://") || link.startsWith("https://")) {
+      window.open(link, "_blank");
+    } else {
+      alert("Not a valid link: " + link);
+    }
   };
 
   return (
-    <Box>
-      {/* TextField to add new references */}
-      <TextField
-        fullWidth
-        label={STRINGS.referencesLabel}
-        value={newReference}
-        onChange={(e) => setNewReference(e.target.value)}
-        margin="normal"
-      />
-      <Button variant="contained" onClick={handleAddReference}>
-        Add Reference
+    <Box key={index} mt={1} style={{ margin: "4px" }}>
+      <Button
+        onClick={() => handleReferenceClick(reference)}
+        style={{ display: "flex", flexDirection: "row", alignItems: "center" }}
+      >
+        <Typography
+          style={{
+            textDecoration: "underline",
+            color: "blue",
+            fontWeight: "bold",
+            textTransform: "lowercase",
+            fontSize: "14px"
+          }}
+        >
+          {reference}
+        </Typography>
       </Button>
-
-      {/* Display references as buttons */}
-      {qa.references && qa.references.length > 0 && (
-        <Box mt={2}>
-          {qa.references.map((ref, refIndex) => (
-            <Button
-              key={refIndex}
-              variant="outlined"
-              onClick={() => handleReferenceClick(ref)}
-              style={{ margin: "4px" }}
-            >
-              Reference {refIndex + 1}
-            </Button>
-          ))}
-        </Box>
-      )}
     </Box>
   );
 };

@@ -66,6 +66,8 @@ const locales = {
     confirmation_EditJourney:"Are you sure you want to edit the previously provided details? \n\nThis will allow you to reprocess your request with the updated information.",
     confirmation_generateJourney:'Are you sure you want to regenerate the question? \n\nThis will generate a new set of questions based on your inputs.',
     generatedQuestion: "Generated Questions",
+    referencesLabel: "Add Reference",
+    add:"Add"
   },
   hi: {
     title: "Q&A जनरेटर",

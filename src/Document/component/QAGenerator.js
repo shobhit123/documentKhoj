@@ -7,7 +7,8 @@ import {
   Typography,
   Fab,
   Snackbar,
-  Alert
+  Alert,
+  InputAdornment
 } from "@mui/material";
 import {
   Edit as EditIcon,
@@ -17,7 +18,8 @@ import {
   HelpOutline as HelpOutlineIcon,
   Description as DescriptionIcon,
   Link as LinkIcon,
-  Label as LabelIcon
+  Label as LabelIcon,
+  Add
 } from "@mui/icons-material";
 import TagInput from "./TagInput";
 import ReferencesCard from "./ReferencesCard";
@@ -37,13 +39,14 @@ const QAGenerator = ({
     answer: "",
     pageNumber: "",
     pageSection: "",
-    references: "",
+    references: [],
     is_llm_generated: false,
     tags: [],
     question_guidance: ""
   });
   const [showSnackbar, setShowSnackbar] = useState(false);
-
+  const [newReferences, setNewReferences] = useState({});
+  const [newReferenceQuestion, setNewReferenceQuestion] = useState("");
   const handleAddNewQuestion = (qa = null, index = null) => {
     setEditIndex(index);
     setCurrentQA(
@@ -52,7 +55,7 @@ const QAGenerator = ({
         answer: "",
         pageNumber: "",
         pageSection: "",
-        references: "",
+        references: [],
         is_llm_generated: false,
         tags: [],
         question_guidance: ""
@@ -112,6 +115,33 @@ const QAGenerator = ({
     } else {
       onAddNewQuestionSelected(true);
       handleAddNewQuestion(true);
+    }
+  };
+
+  const handleAddReference = (index) => {
+    const referenceText = newReferences[index]?.trim();
+    if (referenceText) {
+      const updatedReferences = [...qaList[index].references, referenceText];
+
+      const updatedList = [...qaList];
+      updatedList[index] = {
+        ...updatedList[index],
+        references: updatedReferences
+      };
+
+      setQaList(updatedList);
+      setNewReferences({ ...newReferences, [index]: "" });
+    }
+  };
+
+  const handleAddReferenceQuestion = () => {
+    if (newReferenceQuestion.trim() !== "") {      
+      setCurrentQA((prevQA) => ({
+        ...prevQA,
+        references: [...(currentQA.references || []), newReferenceQuestion], 
+      }));
+      
+      setNewReferenceQuestion("");
     }
   };
 
@@ -223,29 +253,51 @@ const QAGenerator = ({
                       margin="normal"
                     />
                   )}
-                  {qa.references !== undefined && (
-                    <TextField
-                      fullWidth
-                      label={STRINGS.referencesLabel}
-                      value={qa.references}
-                      onChange={(e) => {
-                        const updatedList = [...qaList];
-                        updatedList[index].references = e.target.value;
-                        setQaList(updatedList);
-                      }}
-                      margin="normal"
-                    />
-                  )}
-                  {/* {qa.references.map((qa, index) => (
+                  <TextField
+                    fullWidth
+                    label={STRINGS.referencesLabel}
+                    value={newReferences[index] || ""}
+                    onChange={(e) =>
+                      setNewReferences({
+                        ...newReferences,
+                        [index]: e.target.value
+                      })
+                    }
+                    margin="normal"
+                    InputProps={{
+                      endAdornment: newReferences[index] && (
+                        <InputAdornment
+                          position="end"
+                          style={{
+                            backgroundColor: "#1976d2",
+                            borderRadius: 4,
+                            paddingHorizontal: 8
+                          }}
+                        >
+                          <IconButton
+                            onClick={() => handleAddReference(index)}
+                            size="small"
+                            sx={{
+                              color: "white",
+                              transition: "transform 0.2s ease-in-out",
+                              "&:hover": { transform: "scale(1.15)" }
+                            }}
+                          >
+                            <Add />
+                            <Typography>{"Add"}</Typography>
+                          </IconButton>
+                        </InputAdornment>
+                      )
+                    }}
+                  />
+
+                  {qa.references.map((reference, refIndex) => (
                     <ReferencesCard
-                      key={index}
-                      qa={qa}
-                      index={index}
-                      qaList={qaList}
-                      // setQaList={setQaList}
-                      setQaList={()=>{}}
+                      key={refIndex}
+                      reference={reference}
+                      STRINGS={STRINGS}
                     />
-                  ))} */}
+                  ))}
                   <TagInput
                     tagsArray={qa.tags}
                     onTagsChange={(newTags) => {
@@ -321,6 +373,48 @@ const QAGenerator = ({
             }
             margin="normal"
           />
+
+
+          <TextField
+            fullWidth
+            label={STRINGS.referencesLabel}
+            value={newReferenceQuestion} 
+            onChange={(e) => setNewReferenceQuestion(e.target.value)} 
+            margin="normal"
+            InputProps={{
+              endAdornment: (
+                <InputAdornment
+                  position="end"
+                  style={{
+                    backgroundColor: "#1976d2",
+                    borderRadius: 4,
+                    paddingHorizontal: 8
+                  }}
+                >
+                  <IconButton
+                    onClick={handleAddReferenceQuestion} 
+                    size="small"
+                    sx={{
+                      color: "white",
+                      transition: "transform 0.2s ease-in-out",
+                      "&:hover": { transform: "scale(1.15)" }
+                    }}
+                  >
+                    <Add />
+                    <Typography>{STRINGS.add}</Typography>
+                  </IconButton>
+                </InputAdornment>
+              )
+            }}
+          />
+          {currentQA?.references?.map((reference, refIndex) => (
+            <ReferencesCard
+              key={refIndex}
+              reference={reference}
+              STRINGS={STRINGS}
+            />
+          ))}
+
           <TagInput
             tagsArray={currentQA.tags}
             onTagsChange={handleTagsChange}
