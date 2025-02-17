@@ -5,35 +5,32 @@ import {
   IconButton,
   TextField,
   Typography,
-  Modal
+  Fab,
+  Snackbar,
+  Alert
 } from "@mui/material";
 import {
   Edit as EditIcon,
   Delete as DeleteIcon,
-  AddCircle as AddCircleIcon,
+  Add as AddIcon,
   QuestionAnswer as QuestionAnswerIcon,
   HelpOutline as HelpOutlineIcon,
   Description as DescriptionIcon,
   Link as LinkIcon,
-  Label as LabelIcon,
-  QuestionAnswer,
-  Edit,
-  Refresh,
-  Add,
-  RestartAlt,
-  QuestionMark
+  Label as LabelIcon
 } from "@mui/icons-material";
 import TagInput from "./TagInput";
+import ReferencesCard from "./ReferencesCard";
 
 const QAGenerator = ({
   document,
   onQaListChange,
   STRINGS,
   onEditDetails,
-  onReGenerateQA
+  onAddNewQuestionSelected
 }) => {
   const [qaList, setQaList] = useState(document?.qaList || []);
-  const [openModal, setOpenModal] = useState(false);
+  const [addNewQuestion, setAddNewQuestion] = useState(false);
   const [editIndex, setEditIndex] = useState(null);
   const [currentQA, setCurrentQA] = useState({
     question: "",
@@ -45,8 +42,9 @@ const QAGenerator = ({
     tags: [],
     question_guidance: ""
   });
+  const [showSnackbar, setShowSnackbar] = useState(false);
 
-  const handleOpenModal = (qa = null, index = null) => {
+  const handleAddNewQuestion = (qa = null, index = null) => {
     setEditIndex(index);
     setCurrentQA(
       qa || {
@@ -60,10 +58,13 @@ const QAGenerator = ({
         question_guidance: ""
       }
     );
-    setOpenModal(true);
+    setAddNewQuestion(true);
   };
 
-  const handleCloseModal = () => setOpenModal(false);
+  const handleCloseModal = () => {
+    setAddNewQuestion(false);
+    onAddNewQuestionSelected(false);
+  };
 
   const handleSaveQA = () => {
     if (!currentQA.question || !currentQA.answer) {
@@ -79,6 +80,7 @@ const QAGenerator = ({
     setQaList(updatedList);
     onQaListChange(false, [], updatedList);
     handleCloseModal();
+    onAddNewQuestionSelected(false);
   };
 
   const handleTagsChange = (newTags) => {
@@ -104,8 +106,17 @@ const QAGenerator = ({
     }
   };
 
+  const handleAddQuestion = () => {
+    if (addNewQuestion) {
+      setShowSnackbar(true);
+    } else {
+      onAddNewQuestionSelected(true);
+      handleAddNewQuestion(true);
+    }
+  };
+
   return (
-    <Box item xs={12} md={12}>
+    <Box sx={{ position: "relative", minHeight: "100vh", pb: 10 }}>
       <Box>
         <Box
           sx={{
@@ -120,28 +131,14 @@ const QAGenerator = ({
           }}
         >
           <Typography variant="h6" fontWeight={600} color="primary">
-            {STRINGS.title}
+            {STRINGS.generatedQuestion}
           </Typography>
 
           <Box display="flex" flexDirection="row" gap={2}>
             <Button
               variant="contained"
               color="primary"
-              startIcon={<RestartAlt />}
-              onClick={() => {
-                const userConfirmed = window.confirm(
-                  STRINGS.confirmation_restart_journey
-                );
-                if (userConfirmed) {
-                  window.location.reload();
-                }
-              }}
-            />
-
-            <Button
-              variant="contained"
-              color="primary"
-              startIcon={<Edit />}
+              startIcon={<EditIcon />}
               onClick={() => {
                 const userConfirmed = window.confirm(
                   STRINGS.confirmation_EditJourney
@@ -160,22 +157,8 @@ const QAGenerator = ({
             <Button
               variant="contained"
               color="primary"
-              startIcon={<Refresh />}
-              onClick={() => {
-                const userConfirmed = window.confirm(
-                  STRINGS.confirmation_generateJourney
-                );
-                if (userConfirmed) {
-                  onReGenerateQA();
-                }
-              }}
-            />
-
-            <Button
-              variant="contained"
-              color="primary"
-              startIcon={<Add />}
-              onClick={() => handleOpenModal()}
+              startIcon={<AddIcon />}
+              onClick={handleAddQuestion}
             />
           </Box>
         </Box>
@@ -202,105 +185,78 @@ const QAGenerator = ({
               }}
             >
               <Box display="flex" justifyContent="space-between">
-                <Box>
-                  <Typography
-                    variant="body2"
-                    sx={{
-                      fontWeight: 400,
-                      display: "flex",
-                      alignItems: "center",
-                      color: "text.secondary",
-                      gap: 1
+                <Box width="100%">
+                  <TextField
+                    fullWidth
+                    label={STRINGS.questionLabel}
+                    value={qa.question}
+                    onChange={(e) => {
+                      const updatedList = [...qaList];
+                      updatedList[index].question = e.target.value;
+                      setQaList(updatedList);
                     }}
-                  >
-                    <QuestionMark color="action" />
-                    <strong>{STRINGS.questionLabel}</strong>{" "}
-                    <strong>{qa.question}</strong>
-                  </Typography>
-                  <Typography
-                    variant="body2"
-                    sx={{
-                      fontWeight: 400,
-                      display: "flex",
-                      alignItems: "center",
-                      color: "text.secondary",
-                      gap: 1
+                    margin="normal"
+                  />
+                  <TextField
+                    fullWidth
+                    label={STRINGS.answerLabel}
+                    value={qa.answer}
+                    onChange={(e) => {
+                      const updatedList = [...qaList];
+                      updatedList[index].answer = e.target.value;
+                      setQaList(updatedList);
                     }}
-                  >
-                    <QuestionAnswer color="action" />
-                    <strong>{STRINGS.answerLabel}</strong> {qa.answer}
-                  </Typography>
-                  {qa.pageSection && (
-                    <Typography
-                      variant="body2"
-                      sx={{
-                        mt: 1,
-                        color: "text.secondary",
-                        display: "flex",
-                        alignItems: "center",
-                        gap: 1
+                    multiline
+                    minRows={3}
+                    margin="normal"
+                  />
+                  {qa.pageSection !== undefined && (
+                    <TextField
+                      fullWidth
+                      label={STRINGS.sectionLabel}
+                      value={qa.pageSection}
+                      onChange={(e) => {
+                        const updatedList = [...qaList];
+                        updatedList[index].pageSection = e.target.value;
+                        setQaList(updatedList);
                       }}
-                    >
-                      <DescriptionIcon color="action" />{" "}
-                      <strong>{STRINGS.sectionLabel}</strong> {qa.pageSection}
-                    </Typography>
+                      margin="normal"
+                    />
                   )}
-                  {qa.references?.length > 0 && (
-                    <Typography
-                      variant="body2"
-                      sx={{
-                        mt: 1,
-                        color: "text.secondary",
-                        display: "flex",
-                        alignItems: "center",
-                        gap: 1
+                  {qa.references !== undefined && (
+                    <TextField
+                      fullWidth
+                      label={STRINGS.referencesLabel}
+                      value={qa.references}
+                      onChange={(e) => {
+                        const updatedList = [...qaList];
+                        updatedList[index].references = e.target.value;
+                        setQaList(updatedList);
                       }}
-                    >
-                      <LinkIcon color="action" />{" "}
-                      <strong>{STRINGS.referencesLabel}</strong>{" "}
-                      {qa.references.join(", ")}
-                    </Typography>
+                      margin="normal"
+                    />
                   )}
-                  {qa.tags?.length > 0 && (
-                    <Box
-                      sx={{
-                        mt: 1,
-                        display: "flex",
-                        alignItems: "center",
-                        flexWrap: "wrap",
-                        gap: 1
-                      }}
-                    >
-                      <LabelIcon color="action" />
-                      {qa.tags.map((tag, idx) => (
-                        <Box
-                          key={idx}
-                          sx={{
-                            px: 1.5,
-                            py: 0.5,
-                            bgcolor: "primary.light",
-                            borderRadius: 1,
-                            fontSize: "0.875rem",
-                            fontWeight: 500
-                          }}
-                        >
-                          {tag}
-                        </Box>
-                      ))}
-                    </Box>
-                  )}
+                  {/* {qa.references.map((qa, index) => (
+                    <ReferencesCard
+                      key={index}
+                      qa={qa}
+                      index={index}
+                      qaList={qaList}
+                      // setQaList={setQaList}
+                      setQaList={()=>{}}
+                    />
+                  ))} */}
+                  <TagInput
+                    tagsArray={qa.tags}
+                    onTagsChange={(newTags) => {
+                      const updatedList = [...qaList];
+                      updatedList[index].tags = newTags;
+                      setQaList(updatedList);
+                    }}
+                    STRINGS={STRINGS}
+                  />
                 </Box>
                 <Box display="flex" alignItems="center">
-                  <IconButton
-                    onClick={() => handleOpenModal(qa, index)}
-                    sx={{
-                      color: "#1976d2",
-                      "&:hover": { bgcolor: "#e3f2fd" },
-                      mr: 1
-                    }}
-                  >
-                    <EditIcon />
-                  </IconButton>
                   <IconButton
                     onClick={() => handleDeleteQA(index)}
                     sx={{ color: "#f44336", "&:hover": { bgcolor: "#ffebee" } }}
@@ -314,23 +270,16 @@ const QAGenerator = ({
         )}
       </Box>
 
-      <Modal
-        open={openModal}
-        onClose={handleCloseModal}
-        sx={{ display: "flex", alignItems: "center", justifyContent: "center" }}
-      >
+      {addNewQuestion && (
         <Box
           sx={{
             p: 4,
-            bgcolor: "white",
-            boxShadow: 3,
-            borderRadius: 3,
-            width: 600,
-            maxHeight: "90vh",
+            boxShadow: 4,
+            borderRadius: 2,
             overflowY: "auto"
           }}
         >
-          <Typography variant="h6" sx={{ fontWeight: 600, mb: 2 }}>
+          <Typography variant="h6" sx={{ fontWeight: 600 }}>
             {editIndex !== null ? STRINGS.editQA : STRINGS.addQA}
           </Typography>
           <TextField
@@ -377,26 +326,45 @@ const QAGenerator = ({
             onTagsChange={handleTagsChange}
             STRINGS={STRINGS}
           />
-          <Button
-            variant="contained"
-            color="primary"
-            fullWidth
-            onClick={handleSaveQA}
-            sx={{ mt: 2 }}
-          >
-            {STRINGS.saveQA}
-          </Button>
-          <Button
-            variant="outlined"
-            color="error"
-            fullWidth
-            onClick={handleCloseModal}
-            sx={{ mt: 1 }}
-          >
-            {STRINGS.cancel}
-          </Button>
+          <Box style={{ display: "flex", gap: 10 }}>
+            <Button
+              variant="outlined"
+              color="error"
+              fullWidth
+              onClick={handleCloseModal}
+            >
+              {STRINGS.cancel}
+            </Button>
+            <Button
+              variant="contained"
+              color="primary"
+              fullWidth
+              onClick={handleSaveQA}
+            >
+              {STRINGS.saveQA}
+            </Button>
+          </Box>
         </Box>
-      </Modal>
+      )}
+
+      <Fab
+        color="primary"
+        aria-label="add"
+        sx={{ position: "fixed", bottom: 106, right: 16 }}
+        onClick={handleAddQuestion}
+      >
+        <AddIcon />
+      </Fab>
+
+      <Snackbar
+        open={showSnackbar}
+        autoHideDuration={6000}
+        onClose={() => setShowSnackbar(false)}
+      >
+        <Alert onClose={() => setShowSnackbar(false)} severity="warning">
+          Please submit the current question before adding a new one.
+        </Alert>
+      </Snackbar>
     </Box>
   );
 };

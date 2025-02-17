@@ -4,7 +4,7 @@ export const generateRealQA = (qnaData) => {
     answer: item.answer,
     pageNumber: item.page_no,
     pageSection: item.section_detail,
-    references: item.deep_links.length ? item.deep_links : [`Ref ${index + 1}`],
+    references: item?.deep_links?.length ? item?.deep_links : [],
     tags: item.tags || [`Tag ${index + 1}`]
   }));
 };

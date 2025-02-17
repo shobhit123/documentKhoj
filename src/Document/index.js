@@ -32,6 +32,7 @@ import { generateRealQA } from "../helper";
 import { generateQA } from "../API/calls/generateQA";
 import { getStrings } from "./common/strings";
 import { submitDocument } from "../API/calls/submitDocument";
+// import { mockQAList } from './QAMOCKLIST';
 
 const DocumentUpload = () => {
   const [documentData, setDocumentData] = useState({
@@ -43,6 +44,7 @@ const DocumentUpload = () => {
     fileUploadResponse: null,
     isDocumentUploaded: false,
     qaList: [],
+    // qaList: mockQAList,
     question_guidance: ""
   });
 
@@ -52,6 +54,7 @@ const DocumentUpload = () => {
   const [showPDF, setShowPDF] = useState(false);
   const [isLocale, setIsLocale] = useState("en");
   const [isToggleOn, setIsToggleOff] = useState(false);
+  const [isAddNewQuestionSelected, setIsAddNewQuestionSelected] = useState(false)
   const toggleLanguage = () => {
     if (isLocale === "en") {
       setIsLocale("hi");
@@ -107,7 +110,8 @@ const DocumentUpload = () => {
       summary,
       pageLink,
       fileUploadResponse,
-      question_guidance
+      question_guidance,
+      numQA
     } = documentData;
     
     let missingFields = [];
@@ -129,14 +133,16 @@ const DocumentUpload = () => {
     const response = await generateQA(
       fileUploadResponse?.object_path,
       fileUploadResponse?.mimeType,
-      question_guidance
+      question_guidance,
+      numQA
     );
     if (response?.qna_response?.length) {
-      setTimeout(() => {
-        setDocumentData((prevData) => ({
+      setTimeout(async () => {
+        await setDocumentData((prevData) => ({
           ...prevData,
           qaList: generateRealQA(response.qna_response)
         }));
+        setUpdatedDocument(documentData);
         setLoading(false);
         setExpanded(false); // Collapse document section after generating questions
       }, 2000);
@@ -144,11 +150,10 @@ const DocumentUpload = () => {
   };
 
   const handleOnSubmit = async () => {
-    setLoading(true); // Show loader
-
+    setLoading(true); // Show loader    
     try {
-      const response = await submitDocument(updatedDocument);
 
+      const response = await submitDocument(updatedDocument);
       if (response?.record_id) {
         setDocumentData({
           documentName: "",
@@ -173,6 +178,10 @@ const DocumentUpload = () => {
       setLoading(false); // Hide loader after submission
     }
   };
+
+  const handleOnAddNewQuestionClick = (state) => {
+    setIsAddNewQuestionSelected(state)
+  }
 
   return (
     <Box container spacing={4} sx={{ p: 3 }}>
@@ -367,6 +376,7 @@ const DocumentUpload = () => {
             STRINGS={STRINGS}
             onEditDetails={()=>setExpanded(!expanded)}
             onReGenerateQA={handleGenerateQA}
+            onAddNewQuestionSelected={handleOnAddNewQuestionClick}
           />
         </Box>
       )}
@@ -377,8 +387,8 @@ const DocumentUpload = () => {
           <Button
             variant="contained"
             fullWidth
+            disabled={isAddNewQuestionSelected}
             onClick={handleOnSubmit}
-            sx={{ py: 1, backgroundColor: "#2e7d32" }}
             startIcon={<SaveIcon />}
           >
             {STRINGS.submit}

@@ -64,7 +64,8 @@ const locales = {
     regenerateQA: "ReGenerate Q&A",
     confirmation_restart_journey:"Are you sure you want to restart the journey? \n\nPlease note that doing so will erase all the details you have entered on this page.",
     confirmation_EditJourney:"Are you sure you want to edit the previously provided details? \n\nThis will allow you to reprocess your request with the updated information.",
-    confirmation_generateJourney:'Are you sure you want to regenerate the question? \n\nThis will generate a new set of questions based on your inputs.'
+    confirmation_generateJourney:'Are you sure you want to regenerate the question? \n\nThis will generate a new set of questions based on your inputs.',
+    generatedQuestion: "Generated Questions",
   },
   hi: {
     title: "Q&A जनरेटर",
@@ -128,7 +129,8 @@ const locales = {
       "कृपया प्रतीक्षा करें, आपका अनुरोध प्रोसेस किया जा रहा है...",
     restartJourney: "यात्रा को फिर से शुरू करें",
     editProvidedDetails: "प्रदान की गई जानकारी को संपादित करें",
-    regenerateQA: "प्रश्नोत्तरी फिर से उत्पन्न करें"
+    regenerateQA: "प्रश्नोत्तरी फिर से उत्पन्न करें",
+    generatedQuestion: "Generated Questions",
   }
 };
 
