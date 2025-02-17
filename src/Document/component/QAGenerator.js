@@ -81,7 +81,8 @@ const QAGenerator = ({
       : updatedList.push(currentQA);
 
     setQaList(updatedList);
-    onQaListChange(false, [], updatedList);
+    // onQaListChange(false, [], updatedList);
+    onQaListChange('', [], updatedList);
     handleCloseModal();
     onAddNewQuestionSelected(false);
   };
@@ -97,7 +98,9 @@ const QAGenerator = ({
       updatedList[editIndex] = { ...updatedList[editIndex], tags: newTags };
 
       setQaList(updatedList);
-    }
+      // onQaListChange(true, newTags, []);
+      onQaListChange('TAG', newTags, []);
+    }    
   };
 
   const handleDeleteQA = (index) => {
@@ -105,7 +108,8 @@ const QAGenerator = ({
     if (confirmDelete) {
       const updatedList = qaList.filter((_, i) => i !== index);
       setQaList(updatedList);
-      onQaListChange(false, [], updatedList);
+      // onQaListChange(false, [], updatedList);
+      onQaListChange('', [], updatedList);
     }
   };
 
@@ -131,16 +135,17 @@ const QAGenerator = ({
 
       setQaList(updatedList);
       setNewReferences({ ...newReferences, [index]: "" });
+      onQaListChange('REF', [], updatedList );
     }
   };
 
   const handleAddReferenceQuestion = () => {
-    if (newReferenceQuestion.trim() !== "") {      
+    if (newReferenceQuestion.trim() !== "") {
       setCurrentQA((prevQA) => ({
         ...prevQA,
-        references: [...(currentQA.references || []), newReferenceQuestion], 
+        references: [...(currentQA.references || []), newReferenceQuestion]
       }));
-      
+
       setNewReferenceQuestion("");
     }
   };
@@ -240,6 +245,22 @@ const QAGenerator = ({
                     minRows={3}
                     margin="normal"
                   />
+                  {currentQA.pageNumber !== undefined && (
+                    <TextField
+                      fullWidth
+                      label={STRINGS.pageNumber}
+                      type="number"
+                      value={qa.pageNumber}
+                      onChange={(e) =>                        
+                        {
+                          const updatedList = [...qaList];
+                          updatedList[index].pageNumber = e.target.value;
+                          setQaList(updatedList);
+                        }
+                      }
+                      margin="normal"
+                    />
+                  )}
                   {qa.pageSection !== undefined && (
                     <TextField
                       fullWidth
@@ -257,12 +278,12 @@ const QAGenerator = ({
                     fullWidth
                     label={STRINGS.referencesLabel}
                     value={newReferences[index] || ""}
-                    onChange={(e) =>
+                    onChange={(e) => {
                       setNewReferences({
                         ...newReferences,
                         [index]: e.target.value
-                      })
-                    }
+                      });                      
+                    }}
                     margin="normal"
                     InputProps={{
                       endAdornment: newReferences[index] && (
@@ -374,12 +395,11 @@ const QAGenerator = ({
             margin="normal"
           />
 
-
           <TextField
             fullWidth
             label={STRINGS.referencesLabel}
-            value={newReferenceQuestion} 
-            onChange={(e) => setNewReferenceQuestion(e.target.value)} 
+            value={newReferenceQuestion}
+            onChange={(e) => setNewReferenceQuestion(e.target.value)}
             margin="normal"
             InputProps={{
               endAdornment: (
@@ -392,7 +412,7 @@ const QAGenerator = ({
                   }}
                 >
                   <IconButton
-                    onClick={handleAddReferenceQuestion} 
+                    onClick={handleAddReferenceQuestion}
                     size="small"
                     sx={{
                       color: "white",

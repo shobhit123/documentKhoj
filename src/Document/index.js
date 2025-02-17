@@ -32,7 +32,8 @@ import { generateRealQA } from "../helper";
 import { generateQA } from "../API/calls/generateQA";
 import { getStrings } from "./common/strings";
 import { submitDocument } from "../API/calls/submitDocument";
-import { mockQAList } from './QAMOCKLIST';
+import JSONToCSVConverter from "./component/JSONToCSVConverter";
+import UploadExcel from "./component/UploadExcel";
 
 const DocumentUpload = () => {
   const [documentData, setDocumentData] = useState({
@@ -54,7 +55,8 @@ const DocumentUpload = () => {
   const [showPDF, setShowPDF] = useState(false);
   const [isLocale, setIsLocale] = useState("en");
   const [isToggleOn, setIsToggleOff] = useState(false);
-  const [isAddNewQuestionSelected, setIsAddNewQuestionSelected] = useState(false)
+  const [isAddNewQuestionSelected, setIsAddNewQuestionSelected] =
+    useState(false);
   const toggleLanguage = () => {
     if (isLocale === "en") {
       setIsLocale("hi");
@@ -90,27 +92,16 @@ const DocumentUpload = () => {
     }));
   };
 
-  // const handleQAListChange = (type, newTags, qnaList) => {
-  //   if (type === 'TAG') {
-  //     setUpdatedDocument({
-  //       ...documentData,
-  //       tags: newTags
-  //     });
-  //   } else if (type === 'REF') {
-
-  //   }
-  //    else {
-  //     setUpdatedDocument({
-  //       ...documentData,
-  //       qaList: qnaList
-  //     });
-  //   }
-  // };
-  const handleQAListChange = (isTags, newTags, qnaList) => {
-    if (isTags) {
+  const handleQAListChange = (type, newTags, qnaList) => {
+    if (type === "TAG") {
       setUpdatedDocument({
         ...documentData,
         tags: newTags
+      });
+    } else if (type === "REF") {
+      setUpdatedDocument({
+        ...documentData,
+        qaList: qnaList
       });
     } else {
       setUpdatedDocument({
@@ -129,7 +120,6 @@ const DocumentUpload = () => {
       question_guidance,
       numQA
     } = documentData;
-    
     let missingFields = [];
 
     // Check for missing fields
@@ -153,12 +143,15 @@ const DocumentUpload = () => {
       numQA
     );
     if (response?.qna_response?.length) {
-      setTimeout(async () => {
-        await setDocumentData((prevData) => ({
-          ...prevData,
-          qaList: generateRealQA(response.qna_response)
-        }));
-        setUpdatedDocument(documentData);
+      const generatedQA = generateRealQA(response.qna_response);
+
+      setTimeout(() => {
+        setDocumentData((prevData) => {
+          const updatedData = { ...prevData, qaList: generatedQA };
+          setUpdatedDocument(updatedData);
+          return updatedData;
+        });
+
         setLoading(false);
         setExpanded(false); // Collapse document section after generating questions
       }, 2000);
@@ -166,9 +159,8 @@ const DocumentUpload = () => {
   };
 
   const handleOnSubmit = async () => {
-    setLoading(true); // Show loader    
+    setLoading(true); // Show loader
     try {
-
       const response = await submitDocument(updatedDocument);
       if (response?.record_id) {
         setDocumentData({
@@ -196,8 +188,8 @@ const DocumentUpload = () => {
   };
 
   const handleOnAddNewQuestionClick = (state) => {
-    setIsAddNewQuestionSelected(state)
-  }
+    setIsAddNewQuestionSelected(state);
+  };
 
   return (
     <Box container spacing={4} sx={{ p: 3 }}>
@@ -231,7 +223,7 @@ const DocumentUpload = () => {
               {STRINGS.selectedLanguage}
             </Typography>
             <Switch checked={isToggleOn} onChange={toggleLanguage} />
-          </Box>          
+          </Box>
           {documentData?.qaList?.length > 0 && (
             <IconButton
               onClick={() => {
@@ -316,7 +308,12 @@ const DocumentUpload = () => {
                 value={documentData.numQA}
                 placeholder={STRINGS.questionPlaceHolder}
                 onChange={(e) => {
-                  const value = parseInt(e.target.value, 10);
+                  let value = parseInt(e.target.value, 10);
+
+                  if (isNaN(value) || value <= 0) {
+                    value = 0;
+                  }
+
                   if (value >= 1 && value <= 100) {
                     handleChange("numQA", value);
                   }
@@ -334,7 +331,7 @@ const DocumentUpload = () => {
               <TextField
                 fullWidth
                 label={STRINGS.question_guidance}
-                value={documentData.question_guidance} 
+                value={documentData.question_guidance}
                 placeholder={STRINGS.question_guidancePlaceHolder}
                 onChange={(e) =>
                   handleChange("question_guidance", e.target.value)
@@ -390,9 +387,21 @@ const DocumentUpload = () => {
             document={documentData}
             onQaListChange={handleQAListChange}
             STRINGS={STRINGS}
-            onEditDetails={()=>setExpanded(!expanded)}
+            onEditDetails={() => setExpanded(!expanded)}
             onReGenerateQA={handleGenerateQA}
             onAddNewQuestionSelected={handleOnAddNewQuestionClick}
+          />
+        </Box>
+      )}
+      {documentData?.qaList.length > 0 && (
+        <Box style={{ display: "flex", flexDirection: "row", gap: 4 }}>
+          <JSONToCSVConverter
+            jsonData={documentData?.qaList}
+            fileName="Questions"
+          />
+          <UploadExcel
+            onUploadSuccess={handleUploadSuccess}
+            STRINGS={STRINGS}
           />
         </Box>
       )}
