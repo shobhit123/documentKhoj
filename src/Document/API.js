@@ -1,4 +1,5 @@
 import axios from "axios";
+import { BASE_URL } from "../helper/constants";
 
 
 const api = axios.create({
@@ -10,7 +11,7 @@ const api = axios.create({
 export const apiRequest = async (endpoint, method = "GET", data = {}, customHeaders = {}) => {
   try {
     const response = await api({
-      url: endpoint,
+      url:  `${BASE_URL}${endpoint}`,
       method,
       data,
       headers: {
@@ -19,7 +20,6 @@ export const apiRequest = async (endpoint, method = "GET", data = {}, customHead
     });
     return response.data;
   } catch (error) {
-    console.error("API Error:", error.response || error.message);
-    // throw error;
+    console.error("API Error:", error?.response || error?.message);
   }
 };
