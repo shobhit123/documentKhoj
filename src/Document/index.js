@@ -32,8 +32,6 @@ import { generateRealQA } from "../helper";
 import { generateQA } from "../API/calls/generateQA";
 import { getStrings } from "./common/strings";
 import { submitDocument } from "../API/calls/submitDocument";
-import JSONToCSVConverter from "./component/JSONToCSVConverter";
-import UploadExcel from "./component/UploadExcel";
 
 const DocumentUpload = () => {
   const [documentData, setDocumentData] = useState({
@@ -44,8 +42,7 @@ const DocumentUpload = () => {
     tags: [],
     fileUploadResponse: null,
     isDocumentUploaded: false,
-    qaList: [],
-    // qaList: mockQAList,
+    qaList: [],    
     question_guidance: ""
   });
 
@@ -93,6 +90,7 @@ const DocumentUpload = () => {
   };
 
   const handleQAListChange = (type, newTags, qnaList) => {
+    // QA_LIST
     if (type === "TAG") {
       setUpdatedDocument({
         ...documentData,
@@ -102,6 +100,14 @@ const DocumentUpload = () => {
       setUpdatedDocument({
         ...documentData,
         qaList: qnaList
+      });
+    } else if (type === "QA_LIST") {     
+      setTimeout(() => {
+        setDocumentData((prevData) => {
+          const updatedData = { ...prevData, qaList: qnaList };
+          setUpdatedDocument(updatedData);
+          return updatedData;
+        });
       });
     } else {
       setUpdatedDocument({
@@ -308,14 +314,17 @@ const DocumentUpload = () => {
                 value={documentData.numQA}
                 placeholder={STRINGS.questionPlaceHolder}
                 onChange={(e) => {
-                  let value = parseInt(e.target.value, 10);
+                  let value = e.target.value;
 
-                  if (isNaN(value) || value <= 0) {
-                    value = 0;
+                  if (value === "") {
+                    handleChange("numQA", "");
+                    return;
                   }
 
-                  if (value >= 1 && value <= 100) {
-                    handleChange("numQA", value);
+                  let numValue = parseInt(value, 10);
+
+                  if (!isNaN(numValue) && numValue >= 1 && numValue <= 100) {
+                    handleChange("numQA", numValue);
                   }
                 }}
                 margin="dense"
@@ -390,18 +399,6 @@ const DocumentUpload = () => {
             onEditDetails={() => setExpanded(!expanded)}
             onReGenerateQA={handleGenerateQA}
             onAddNewQuestionSelected={handleOnAddNewQuestionClick}
-          />
-        </Box>
-      )}
-      {documentData?.qaList.length > 0 && (
-        <Box style={{ display: "flex", flexDirection: "row", gap: 4 }}>
-          <JSONToCSVConverter
-            jsonData={documentData?.qaList}
-            fileName="Questions"
-          />
-          <UploadExcel
-            onUploadSuccess={handleUploadSuccess}
-            STRINGS={STRINGS}
           />
         </Box>
       )}

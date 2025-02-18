@@ -11,8 +11,8 @@ const UploadDocument = ({ onUploadSuccess , STRINGS}) => {
   const [response, setResponse] = useState(null);
   const [filePreview, setFilePreview] = useState(null);
 
-  const ALLOWED_TYPES = ["pdf", "docx", "xls", "css"];
-  const MAX_SIZE = 10 * 1024 * 1024; // 10MB
+  const ALLOWED_TYPES = ["pdf", "docx", "xls"];
+  const MAX_SIZE = 10 * 1024 * 1024; 
 
   const handleFileChange = (event) => {
     const selectedFile = event.target.files[0];

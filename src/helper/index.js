@@ -23,7 +23,6 @@ export const transformDataForApi = (inputData = {}) => {
     fileUploadResponse = {},
     question_guidance = ""
   } = inputData;
-
   return {
     summary,
     usecase_id: "f8a57d3a-d0fd-4261-b9d3-b1b02c4b54c1",

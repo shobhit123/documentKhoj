@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   Box,
   Button,
@@ -23,6 +23,8 @@ import {
 } from "@mui/icons-material";
 import TagInput from "./TagInput";
 import ReferencesCard from "./ReferencesCard";
+import JSONToCSVConverter from "./JSONToCSVConverter";
+import CSVtoJSONConverter from "./CSVToJSONConverter";
 
 const QAGenerator = ({
   document,
@@ -31,7 +33,8 @@ const QAGenerator = ({
   onEditDetails,
   onAddNewQuestionSelected
 }) => {
-  const [qaList, setQaList] = useState(document?.qaList || []);
+  // const [qaList, setQaList] = useState(document?.qaList || []);
+  const [qaList, setQaList] = useState([]);
   const [addNewQuestion, setAddNewQuestion] = useState(false);
   const [editIndex, setEditIndex] = useState(null);
   const [currentQA, setCurrentQA] = useState({
@@ -47,6 +50,11 @@ const QAGenerator = ({
   const [showSnackbar, setShowSnackbar] = useState(false);
   const [newReferences, setNewReferences] = useState({});
   const [newReferenceQuestion, setNewReferenceQuestion] = useState("");
+
+  useEffect(() => {
+    setQaList(document?.qaList);
+  }, [document?.qaList]);
+
   const handleAddNewQuestion = (qa = null, index = null) => {
     setEditIndex(index);
     setCurrentQA(
@@ -81,8 +89,7 @@ const QAGenerator = ({
       : updatedList.push(currentQA);
 
     setQaList(updatedList);
-    // onQaListChange(false, [], updatedList);
-    onQaListChange('', [], updatedList);
+    onQaListChange("", [], updatedList);
     handleCloseModal();
     onAddNewQuestionSelected(false);
   };
@@ -99,8 +106,8 @@ const QAGenerator = ({
 
       setQaList(updatedList);
       // onQaListChange(true, newTags, []);
-      onQaListChange('TAG', newTags, []);
-    }    
+      onQaListChange("TAG", newTags, []);
+    }
   };
 
   const handleDeleteQA = (index) => {
@@ -109,7 +116,7 @@ const QAGenerator = ({
       const updatedList = qaList.filter((_, i) => i !== index);
       setQaList(updatedList);
       // onQaListChange(false, [], updatedList);
-      onQaListChange('', [], updatedList);
+      onQaListChange("", [], updatedList);
     }
   };
 
@@ -135,7 +142,7 @@ const QAGenerator = ({
 
       setQaList(updatedList);
       setNewReferences({ ...newReferences, [index]: "" });
-      onQaListChange('REF', [], updatedList );
+      onQaListChange("REF", [], updatedList);
     }
   };
 
@@ -168,32 +175,21 @@ const QAGenerator = ({
           <Typography variant="h6" fontWeight={600} color="primary">
             {STRINGS.generatedQuestion}
           </Typography>
-
-          <Box display="flex" flexDirection="row" gap={2}>
-            <Button
-              variant="contained"
-              color="primary"
-              startIcon={<EditIcon />}
-              onClick={() => {
-                const userConfirmed = window.confirm(
-                  STRINGS.confirmation_EditJourney
-                );
-                if (userConfirmed) {
-                  onEditDetails();
-                }
+          <Box
+            style={{
+              display: "flex",
+              flexDirection: "row",
+              gap: 4,
+              justifyContent: "flex-end"
+            }}
+          >
+            
+            <JSONToCSVConverter jsonData={qaList} fileName="Questions" />
+            <CSVtoJSONConverter
+              STRINGS={STRINGS}
+              onQaListChange={(list) => {
+                list?.length > 0 && onQaListChange("QA_LIST", [], list);
               }}
-              sx={{
-                padding: "6px 12px",
-                fontSize: "14px",
-                minWidth: "auto"
-              }}
-            />
-
-            <Button
-              variant="contained"
-              color="primary"
-              startIcon={<AddIcon />}
-              onClick={handleAddQuestion}
             />
           </Box>
         </Box>
@@ -251,13 +247,11 @@ const QAGenerator = ({
                       label={STRINGS.pageNumber}
                       type="number"
                       value={qa.pageNumber}
-                      onChange={(e) =>                        
-                        {
-                          const updatedList = [...qaList];
-                          updatedList[index].pageNumber = e.target.value;
-                          setQaList(updatedList);
-                        }
-                      }
+                      onChange={(e) => {
+                        const updatedList = [...qaList];
+                        updatedList[index].pageNumber = e.target.value;
+                        setQaList(updatedList);
+                      }}
                       margin="normal"
                     />
                   )}
@@ -282,7 +276,7 @@ const QAGenerator = ({
                       setNewReferences({
                         ...newReferences,
                         [index]: e.target.value
-                      });                      
+                      });
                     }}
                     margin="normal"
                     InputProps={{

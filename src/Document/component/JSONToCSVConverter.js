@@ -1,3 +1,4 @@
+import {  FileUpload } from "@mui/icons-material";
 import { Button } from "@mui/material";
 import React from "react";
 
@@ -45,20 +46,23 @@ const JSONToCSVConverter = ({ jsonData, fileName }) => {
 
   return (
     <Button
-      onClick={downloadCSV}    
-      style={{
-        height:46,
+      variant="contained"
+      component="label"
+      startIcon={<FileUpload />}
+      onClick={downloadCSV}
+      sx={{
+        height: 46,
         padding: "10px 20px",
-        backgroundColor: "#1976d2",
+        backgroundColor: "#AF4C7DFF",
         color: "#fff",
         "&:hover": {
-          backgroundColor: "#1565c0"
+          backgroundColor: "#AF4C7DFF"
         }
       }}
     >
-      Export as CSV
+      Export CSV/XLS 
     </Button>
-  );
+  );  
 };
 
 export default JSONToCSVConverter;
