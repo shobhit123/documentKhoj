@@ -29,7 +29,7 @@ export const transformDataForApi = (inputData = {}) => {
     doc_name: documentName,
     doc_url: pageLink,
     type_of_doc: "main-cms",
-    question_guidance: question_guidance,
+    question_context: question_guidance,
     doc_metadata: metaData,
     user_id: "9b0adf39-2b8b-4679-a0fd-b34803b6b6e2",
     questions: qaList.map((qa = {}) => {
