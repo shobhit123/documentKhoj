@@ -21,7 +21,9 @@ export const transformDataForApi = (inputData = {}) => {
     pageLink = "",
     qaList = [],
     fileUploadResponse = {},
-    question_guidance = ""
+    question_guidance = "",
+    topic='',
+    subTopic=''
   } = inputData;
   return {
     summary,
@@ -54,6 +56,20 @@ export const transformDataForApi = (inputData = {}) => {
       };
     }),
     storage_path: fileUploadResponse.object_path || "",
-    mime_type: fileUploadResponse.mimeType || "application/pdf"
+    mime_type: fileUploadResponse.mimeType || "application/pdf",
+    topic:topic,
+    sub_topic:subTopic
   };
+};
+export const isValidURL = (url) => {
+  try {
+    new URL(url);
+    return true;
+  } catch (error) {
+    return false;
+  }
+};
+
+export const generateSessionId = () => {
+  return Math.random().toString(36).substring(2) + Date.now().toString(36);
 };

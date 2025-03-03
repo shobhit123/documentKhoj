@@ -11,8 +11,14 @@ import {
   Collapse,
   Grid,
   Backdrop,
-  Switch
+  Switch,
+  Drawer,
+  List,
+  ListItem,
+  ListItemIcon,
+  ListItemText,
 } from "@mui/material";
+
 import {
   Description as DocumentIcon,
   ExpandLess,
@@ -23,7 +29,9 @@ import {
   Quiz,
   Pages,
   Description,
-  ModelTraining
+  ModelTraining,
+  Topic,
+  Article,
 } from "@mui/icons-material";
 import TagInput from "./component/TagInput";
 import UploadDocument from "./component/UploadDocument";
@@ -32,8 +40,17 @@ import { generateRealQA } from "../helper";
 import { generateQA } from "../API/calls/generateQA";
 import { getStrings } from "./common/strings";
 import { submitDocument } from "../API/calls/submitDocument";
+import { useNavigate } from "react-router-dom";
+import MenuIcon from "@mui/icons-material/Menu";
+import ChatIcon from "@mui/icons-material/Chat";
 
 const DocumentUpload = () => {
+  const [drawerOpen, setDrawerOpen] = useState(false);
+
+  const toggleDrawer = (open) => () => {
+    setDrawerOpen(open);
+  };
+
   const [documentData, setDocumentData] = useState({
     documentName: "",
     pageLink: "",
@@ -42,10 +59,13 @@ const DocumentUpload = () => {
     tags: [],
     fileUploadResponse: null,
     isDocumentUploaded: false,
-    qaList: [],    
-    question_guidance: ""
+    qaList: [],
+    question_guidance: "",
+    topic: "",
+    subTopic: "",
   });
 
+  const navigate = useNavigate();
   const [updatedDocument, setUpdatedDocument] = useState(documentData || {});
   const [loading, setLoading] = useState(false);
   const [expanded, setExpanded] = useState(true);
@@ -54,6 +74,7 @@ const DocumentUpload = () => {
   const [isToggleOn, setIsToggleOff] = useState(false);
   const [isAddNewQuestionSelected, setIsAddNewQuestionSelected] =
     useState(false);
+
   const toggleLanguage = () => {
     if (isLocale === "en") {
       setIsLocale("hi");
@@ -62,6 +83,7 @@ const DocumentUpload = () => {
     }
     setIsToggleOff(!isToggleOn);
   };
+
   const STRINGS = getStrings(isLocale);
 
   const handleUploadSuccess = (response, fileType) => {
@@ -69,39 +91,38 @@ const DocumentUpload = () => {
       ...prevData,
       fileUploadResponse: {
         object_path: response?.object_path,
-        mimeType: fileType
+        mimeType: fileType,
       },
-      isDocumentUploaded: true
+      isDocumentUploaded: true,
     }));
   };
 
   const handleChange = (field, value) => {
     setDocumentData((prevData) => ({
       ...prevData,
-      [field]: value
+      [field]: value,
     }));
   };
 
   const handleTagsChange = (newTags) => {
     setDocumentData((prevData) => ({
       ...prevData,
-      tags: newTags
+      tags: newTags,
     }));
   };
 
   const handleQAListChange = (type, newTags, qnaList) => {
-    // QA_LIST
     if (type === "TAG") {
       setUpdatedDocument({
         ...documentData,
-        tags: newTags
+        tags: newTags,
       });
     } else if (type === "REF") {
       setUpdatedDocument({
         ...documentData,
-        qaList: qnaList
+        qaList: qnaList,
       });
-    } else if (type === "QA_LIST") {     
+    } else if (type === "QA_LIST") {
       setTimeout(() => {
         setDocumentData((prevData) => {
           const updatedData = { ...prevData, qaList: qnaList };
@@ -112,7 +133,7 @@ const DocumentUpload = () => {
     } else {
       setUpdatedDocument({
         ...documentData,
-        qaList: qnaList
+        qaList: qnaList,
       });
     }
   };
@@ -124,7 +145,9 @@ const DocumentUpload = () => {
       pageLink,
       fileUploadResponse,
       question_guidance,
-      numQA
+      numQA,
+      topic,
+      subTopic,
     } = documentData;
     let missingFields = [];
 
@@ -133,6 +156,8 @@ const DocumentUpload = () => {
     if (!summary) missingFields.push("Summary");
     if (!pageLink) missingFields.push("Reference Link");
     if (!question_guidance) missingFields.push("Question Guidance");
+    if (!topic) missingFields.push("Topic"); 
+    if (!subTopic) missingFields.push("SubTopic");
 
     if (missingFields.length > 0) {
       const missingFieldsText = missingFields.join(", ");
@@ -141,6 +166,7 @@ const DocumentUpload = () => {
       );
       return;
     }
+
     setLoading(true);
     const response = await generateQA(
       fileUploadResponse?.object_path,
@@ -148,6 +174,7 @@ const DocumentUpload = () => {
       question_guidance,
       numQA
     );
+
     if (response?.qna_response?.length) {
       const generatedQA = generateRealQA(response.qna_response);
 
@@ -178,7 +205,9 @@ const DocumentUpload = () => {
           fileUploadResponse: null,
           isDocumentUploaded: false,
           qaList: [],
-          question_guidance: ""
+          question_guidance: "",
+          topic: "", 
+          subTopic: "", 
         });
 
         alert(STRINGS.document_submitted_successfully);
@@ -208,6 +237,25 @@ const DocumentUpload = () => {
           </Typography>
         </Backdrop>
       )}
+
+      {/* Drawer */}
+      <Drawer anchor="left" open={drawerOpen} onClose={toggleDrawer(false)}>
+        <List sx={{ width: 250 }}>
+          <ListItem
+            button
+            onClick={() => {
+              navigate("/chat");
+              setDrawerOpen(false);
+            }}
+          >
+            <ListItemIcon>
+              <ChatIcon color="primary" />
+            </ListItemIcon>
+            <ListItemText primary="Ask a Question or Chat with Us" />
+          </ListItem>
+        </List>
+      </Drawer>
+
       <Box
         sx={{
           display: "flex",
@@ -216,20 +264,23 @@ const DocumentUpload = () => {
           backgroundColor: "#f5f5f5",
           borderRadius: 2,
           px: 2,
-          py: 1
+          py: 1,
         }}
       >
+        <IconButton onClick={toggleDrawer(true)}>
+          <MenuIcon fontSize="large" color="primary" />
+        </IconButton>
         <Typography variant="h6" fontWeight={600} color="primary">
           {STRINGS.title}
         </Typography>
 
         <Box display="flex">
-          <Box display="flex" alignItems="center">
+          {/* <Box display="flex" alignItems="center">
             <Typography variant="body1" fontWeight={100} color="primary">
               {STRINGS.selectedLanguage}
             </Typography>
             <Switch checked={isToggleOn} onChange={toggleLanguage} />
-          </Box>
+          </Box> */}
           {documentData?.qaList?.length > 0 && (
             <IconButton
               onClick={() => {
@@ -255,6 +306,40 @@ const DocumentUpload = () => {
           <Grid container spacing={1} style={{ alignItems: "center" }}>
             {/* Left Section: Other Inputs */}
             <Grid item xs={12} md={6}>
+              {/* Topic Field */}
+              <TextField
+                fullWidth
+                label="Topic"
+                placeholder="Enter Topic"
+                value={documentData.topic}
+                onChange={(e) => handleChange("topic", e.target.value)}
+                margin="dense"
+                InputProps={{
+                  startAdornment: (
+                    <InputAdornment position="start">
+                      <Topic />
+                    </InputAdornment>
+                  ),
+                }}
+              />
+
+              {/* SubTopic Field */}
+              <TextField
+                fullWidth
+                label="SubTopic"
+                placeholder="Enter SubTopic"
+                value={documentData.subTopic}
+                onChange={(e) => handleChange("subTopic", e.target.value)}
+                margin="dense"
+                InputProps={{
+                  startAdornment: (
+                    <InputAdornment position="start">
+                      <Article />
+                    </InputAdornment>
+                  ),
+                }}
+              />
+
               <TextField
                 fullWidth
                 label={STRINGS.fileName}
@@ -267,7 +352,7 @@ const DocumentUpload = () => {
                     <InputAdornment position="start">
                       <Description />
                     </InputAdornment>
-                  )
+                  ),
                 }}
               />
 
@@ -283,7 +368,7 @@ const DocumentUpload = () => {
                     <InputAdornment position="start">
                       <Pages />
                     </InputAdornment>
-                  )
+                  ),
                 }}
               />
 
@@ -301,7 +386,7 @@ const DocumentUpload = () => {
                     <InputAdornment position="start">
                       <Summarize />
                     </InputAdornment>
-                  )
+                  ),
                 }}
               />
 
@@ -333,7 +418,7 @@ const DocumentUpload = () => {
                     <InputAdornment position="start">
                       <Quiz />
                     </InputAdornment>
-                  )
+                  ),
                 }}
               />
 
@@ -353,7 +438,7 @@ const DocumentUpload = () => {
                     <InputAdornment position="start">
                       <ModelTraining />
                     </InputAdornment>
-                  )
+                  ),
                 }}
               />
 

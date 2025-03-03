@@ -1,10 +1,17 @@
-import './App.css';
-import DocumentUpload from './Document';
+import "./App.css";
+import DocumentUpload from "./Document";
+import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import ChatBotPage from "./Document/Chat";
 
 function App() {
   return (
     <div className="App">
-      <DocumentUpload/>
+      <Router>
+        <Routes>
+          <Route path="/" element={<DocumentUpload />} />
+          <Route path="/chat" element={<ChatBotPage />} />
+        </Routes>
+      </Router>
     </div>
   );
 }

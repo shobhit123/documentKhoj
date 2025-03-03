@@ -72,7 +72,8 @@ const locales = {
     referencesLabel: "Add Reference",
     add: "Add",
     somethingWentWrong:
-      "Something went wrong! \nPlease reUpload the file again."
+      "Something went wrong! \nPlease reUpload the file again.",
+      chatWithUs: 'Chat with us...'
   },
   hi: {
     title: "प्रश्न-उत्तर जनरेटर",
@@ -147,7 +148,8 @@ const locales = {
     generatedQuestion: "उत्पन्न प्रश्न",
     referencesLabel: "संदर्भ जोड़ें",
     add: "जोड़ें",
-    somethingWentWrong: "कुछ गलत हो गया! \nकृपया फ़ाइल को पुनः अपलोड करें।"
+    somethingWentWrong: "कुछ गलत हो गया! \nकृपया फ़ाइल को पुनः अपलोड करें।",
+    chatWithUs: 'Chat with us...'
   }
 };
 
