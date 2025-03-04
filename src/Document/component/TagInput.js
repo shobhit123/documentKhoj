@@ -11,8 +11,8 @@ const TagInput = ({ tagsArray, onTagsChange, STRINGS }) => {
     if (event.key === "Enter" && inputValue.trim()) {
       event.preventDefault();
   
-      // Allow only alphanumeric characters and spaces
-      const regex = /^[a-zA-Z0-9 ]+$/;
+      // Allow alphanumeric characters, spaces, and special characters ., _, -, &
+      const regex = /^[a-zA-Z0-9 ._\-&]+$/;
       if (!regex.test(inputValue.trim())) {
         alert(STRINGS.special_characters_not_Allowed);
         return;

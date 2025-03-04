@@ -16,7 +16,7 @@ import {
   List,
   ListItem,
   ListItemIcon,
-  ListItemText,
+  ListItemText
 } from "@mui/material";
 
 import {
@@ -32,6 +32,7 @@ import {
   ModelTraining,
   Topic,
   Article,
+  KeyboardArrowRight
 } from "@mui/icons-material";
 import TagInput from "./component/TagInput";
 import UploadDocument from "./component/UploadDocument";
@@ -62,7 +63,7 @@ const DocumentUpload = () => {
     qaList: [],
     question_guidance: "",
     topic: "",
-    subTopic: "",
+    subTopic: ""
   });
 
   const navigate = useNavigate();
@@ -91,23 +92,23 @@ const DocumentUpload = () => {
       ...prevData,
       fileUploadResponse: {
         object_path: response?.object_path,
-        mimeType: fileType,
+        mimeType: fileType
       },
-      isDocumentUploaded: true,
+      isDocumentUploaded: true
     }));
   };
 
   const handleChange = (field, value) => {
     setDocumentData((prevData) => ({
       ...prevData,
-      [field]: value,
+      [field]: value
     }));
   };
 
   const handleTagsChange = (newTags) => {
     setDocumentData((prevData) => ({
       ...prevData,
-      tags: newTags,
+      tags: newTags
     }));
   };
 
@@ -115,12 +116,12 @@ const DocumentUpload = () => {
     if (type === "TAG") {
       setUpdatedDocument({
         ...documentData,
-        tags: newTags,
+        tags: newTags
       });
     } else if (type === "REF") {
       setUpdatedDocument({
         ...documentData,
-        qaList: qnaList,
+        qaList: qnaList
       });
     } else if (type === "QA_LIST") {
       setTimeout(() => {
@@ -133,7 +134,7 @@ const DocumentUpload = () => {
     } else {
       setUpdatedDocument({
         ...documentData,
-        qaList: qnaList,
+        qaList: qnaList
       });
     }
   };
@@ -147,7 +148,7 @@ const DocumentUpload = () => {
       question_guidance,
       numQA,
       topic,
-      subTopic,
+      subTopic
     } = documentData;
     let missingFields = [];
 
@@ -156,7 +157,7 @@ const DocumentUpload = () => {
     if (!summary) missingFields.push("Summary");
     if (!pageLink) missingFields.push("Reference Link");
     if (!question_guidance) missingFields.push("Question Guidance");
-    if (!topic) missingFields.push("Topic"); 
+    if (!topic) missingFields.push("Topic");
     if (!subTopic) missingFields.push("SubTopic");
 
     if (missingFields.length > 0) {
@@ -195,7 +196,8 @@ const DocumentUpload = () => {
     setLoading(true); // Show loader
     try {
       const response = await submitDocument(updatedDocument);
-      if (response?.record_id) {
+      if (response?.status === "success") {
+        // Check status instead of record_id
         setDocumentData({
           documentName: "",
           pageLink: "",
@@ -206,17 +208,17 @@ const DocumentUpload = () => {
           isDocumentUploaded: false,
           qaList: [],
           question_guidance: "",
-          topic: "", 
-          subTopic: "", 
+          topic: "",
+          subTopic: ""
         });
 
         alert(STRINGS.document_submitted_successfully);
         window.location.reload(); // Reload page on success
       } else {
-        alert(STRINGS.something_went_wrong_to_upload);
+        alert(STRINGS.something_went_wrong);
       }
     } catch (error) {
-      alert(STRINGS.something_went_wrong_to_upload);
+      alert(STRINGS.something_went_wrong);
     } finally {
       setLoading(false); // Hide loader after submission
     }
@@ -247,11 +249,22 @@ const DocumentUpload = () => {
               navigate("/chat");
               setDrawerOpen(false);
             }}
+            sx={{
+              backgroundColor: "#f5f5f5", 
+              borderRadius: "4px",
+              "&:hover": {
+                backgroundColor: "#e0e0e0" 
+              }
+            }}
           >
             <ListItemIcon>
               <ChatIcon color="primary" />
             </ListItemIcon>
-            <ListItemText primary="Ask a Question or Chat with Us" />
+            <ListItemText
+              primary="Ask a Question or Chat with Us"
+              sx={{ cursor: "pointer", fontWeight: 500 }} 
+            />
+            <KeyboardArrowRight />
           </ListItem>
         </List>
       </Drawer>
@@ -264,7 +277,7 @@ const DocumentUpload = () => {
           backgroundColor: "#f5f5f5",
           borderRadius: 2,
           px: 2,
-          py: 1,
+          py: 1
         }}
       >
         <IconButton onClick={toggleDrawer(true)}>
@@ -319,7 +332,7 @@ const DocumentUpload = () => {
                     <InputAdornment position="start">
                       <Topic />
                     </InputAdornment>
-                  ),
+                  )
                 }}
               />
 
@@ -336,7 +349,7 @@ const DocumentUpload = () => {
                     <InputAdornment position="start">
                       <Article />
                     </InputAdornment>
-                  ),
+                  )
                 }}
               />
 
@@ -352,7 +365,7 @@ const DocumentUpload = () => {
                     <InputAdornment position="start">
                       <Description />
                     </InputAdornment>
-                  ),
+                  )
                 }}
               />
 
@@ -368,7 +381,7 @@ const DocumentUpload = () => {
                     <InputAdornment position="start">
                       <Pages />
                     </InputAdornment>
-                  ),
+                  )
                 }}
               />
 
@@ -386,7 +399,7 @@ const DocumentUpload = () => {
                     <InputAdornment position="start">
                       <Summarize />
                     </InputAdornment>
-                  ),
+                  )
                 }}
               />
 
@@ -418,7 +431,7 @@ const DocumentUpload = () => {
                     <InputAdornment position="start">
                       <Quiz />
                     </InputAdornment>
-                  ),
+                  )
                 }}
               />
 
@@ -438,7 +451,7 @@ const DocumentUpload = () => {
                     <InputAdornment position="start">
                       <ModelTraining />
                     </InputAdornment>
-                  ),
+                  )
                 }}
               />
 

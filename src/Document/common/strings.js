@@ -52,7 +52,7 @@ const locales = {
     saveQA: "Save Q&A",
     cancel: "Cancel",
     special_characters_not_Allowed:
-      "Special characters are not allowed in tags.",
+      "Such special characters are not allowed in tags.",
     questionAnswerRequired: "Question and Answer are required!",
     selectedLanguage: "English",
     question_guidance: "Question Guidance",
@@ -73,7 +73,9 @@ const locales = {
     add: "Add",
     somethingWentWrong:
       "Something went wrong! \nPlease reUpload the file again.",
-      chatWithUs: 'Chat with us...'
+      chatWithUs: 'Chat with us...',
+      something_went_wrong:
+      "Something went wrong",
   },
   hi: {
     title: "प्रश्न-उत्तर जनरेटर",

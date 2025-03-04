@@ -1,4 +1,4 @@
-import React, { useState,useRef } from "react";
+import React, { useState, useRef } from "react";
 import {
   AppBar,
   Toolbar,
@@ -24,11 +24,13 @@ import {
   SmartToy as BotIcon,
   AccountCircle as UserIcon,
   Close as CloseIcon,
-  Refresh as RefreshIcon
+  Refresh as RefreshIcon,
 } from "@mui/icons-material";
 import Markdown from "react-markdown";
 import { getSearchResults } from "../../API/calls/getSearchResult";
 import { generateSessionId, isValidURL } from "../../helper";
+import { useNavigate } from "react-router-dom";
+import BackButton from "../component/BackButton";
 
 const ChatBotPage = () => {
   const [searchQuery, setSearchQuery] = useState("");
@@ -53,7 +55,7 @@ const ChatBotPage = () => {
     setError(null); // Reset error state
 
     try {
-      const response = await getSearchResults(query, "search",sessionId);
+      const response = await getSearchResults(query, "search", sessionId);
       if (response) {
         setSearchResults([
           {
@@ -78,7 +80,7 @@ const ChatBotPage = () => {
   // Handle chatbot API call
   const fetchBotResponse = async (message) => {
     try {
-      const response = await getSearchResults(message, "chatbot",sessionId);
+      const response = await getSearchResults(message, "chatbot", sessionId);
       return response.content; // Return the bot's response
     } catch (error) {
       console.error("Error fetching bot response:", error);
@@ -205,205 +207,220 @@ const ChatBotPage = () => {
   };
 
   return (
-    <Box sx={{ display: "flex", height: "100vh", overflow: "hidden" }}>
-      {/* Left Side: Search Bar and Results */}
-      <Box sx={{ flex: 1, p: 3, overflow: "auto", backgroundColor: "#fff" }}>
-        <AppBar
-          position="static"
-          elevation={0}
-          sx={{ backgroundColor: "#004a92" }}
-        >
-          <Toolbar>
-            <TextField
-              fullWidth
-              placeholder="Search..."
-              variant="outlined"
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              sx={{ backgroundColor: "#fff", borderRadius: 1 }}
-              InputProps={{
-                startAdornment: <SearchIcon sx={{ color: "#004a92", mr: 1 }} />,
-                endAdornment: (
-                  <>
-                    <IconButton onClick={() => handleSearch(searchQuery)}>
-                      <MicIcon sx={{ color: "#fff" }} />
-                    </IconButton>
-                    <Button
-                      variant="contained"
-                      sx={{ backgroundColor: "#ff0000", color: "#fff", ml: 1 }}
-                      onClick={() => handleSearch(searchQuery)}
-                    >
-                      Search
-                    </Button>
-                  </>
-                )
-              }}
-            />
-          </Toolbar>
-        </AppBar>
-        <Box sx={{ mt: 3 }}>
-          {/* Loading State */}
-          {loading && (
-            <Box sx={{ display: "flex", justifyContent: "center", mt: 4 }}>
-              <CircularProgress />
-            </Box>
-          )}
+    <>
+      <BackButton />
+      <Box sx={{ display: "flex", height: "100vh", overflow: "hidden" }}>
+        {/* Left Side: Search Bar and Results */}
 
-          {/* Empty/Error/Initial State */}
-          {!loading && searchResults.length === 0 && (
-            <Typography
-              variant="h6"
-              sx={{ color: "#004a92", textAlign: "center", mt: 4 }}
-            >
-              {error
-                ? error
-                : "Enter a query to search for personal loan offers."}
-            </Typography>
-          )}
-
-          {/* Search Results */}
-          {!loading && searchResults.length > 0 && renderSearchResults()}
-
-          {/* Reset Button */}
-          {searchResults.length > 0 && (
-            <Button
-              variant="contained"
-              sx={{
-                backgroundColor: "#ff0000",
-                color: "#fff",
-                position: "fixed",
-                bottom: 20,
-                left: 20
-              }}
-              startIcon={<RefreshIcon />}
-              onClick={resetSearch}
-            >
-              Reset
-            </Button>
-          )}
-
-          {/* Chat Button */}
-          {searchResults.length > 0 && !isChatOpen && (
-            <Button
-              variant="contained"
-              sx={{
-                backgroundColor: "#004a92",
-                color: "#fff",
-                position: "fixed",
-                bottom: 20,
-                right: 20
-              }}
-              startIcon={<ChatIcon />}
-              onClick={() => setIsChatOpen(true)}
-            >
-              Chat with Bot
-            </Button>
-          )}
-        </Box>
-      </Box>
-
-      {/* Right Side: Chat Window */}
-      {isChatOpen && (
-        <Box
-          sx={{ flex: 1, p: 3, backgroundColor: "#f5f5f5", overflow: "auto" }}
-        >
-          <Box
-            sx={{
-              display: "flex",
-              justifyContent: "space-between",
-              alignItems: "center",
-              mb: 2
-            }}
+        <Box sx={{ flex: 1, p: 3, overflow: "auto", backgroundColor: "#fff" }}>
+          <AppBar
+            position="static"
+            elevation={0}
+            sx={{ backgroundColor: "#004a92" }}
           >
-            <Typography variant="h6" sx={{ color: "#004a92" }}>
-              Chat with Bot
-            </Typography>
-            <IconButton onClick={() => setIsChatOpen(false)}>
-              <CloseIcon sx={{ color: "#004a92" }} />
-            </IconButton>
-          </Box>
-          <Box
-            sx={{
-              height: "0.1vh",
-              overflow: "auto",
-              mb: 1,
-              backgroundColor: "#004a92"
-            }}
-          ></Box>
-          <Box sx={{ height: "70vh", overflow: "auto", mb: 2 }}>
-            {chatMessages.map((msg, index) => (
-              <Box
-                key={index}
-                sx={{
-                  display: "flex",
-                  justifyContent: msg.isUser ? "flex-end" : "flex-start",
-                  mb: 2
+            <Toolbar>
+              <TextField
+                fullWidth
+                placeholder="Search..."
+                variant="outlined"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                sx={{ backgroundColor: "#fff", borderRadius: 1 }}
+                InputProps={{
+                  startAdornment: (
+                    <SearchIcon sx={{ color: "#004a92", mr: 1 }} />
+                  ),
+                  endAdornment: (
+                    <>
+                      <IconButton onClick={() => handleSearch(searchQuery)}>
+                        <MicIcon sx={{ color: "#fff" }} />
+                      </IconButton>
+                      <Button
+                        variant="contained"
+                        sx={{
+                          backgroundColor: "#ff0000",
+                          color: "#fff",
+                          ml: 1
+                        }}
+                        onClick={() => handleSearch(searchQuery)}
+                      >
+                        Search
+                      </Button>
+                    </>
+                  )
                 }}
-              >
-                <Box sx={{ display: "flex", alignItems: "center" }}>
-                  {!msg.isUser && <BotIcon sx={{ mr: 1 }} />}
-                  <Paper
-                    sx={{
-                      p: 2,
-                      backgroundColor: msg.isUser ? "#004a92" : "#e0e0e0",
-                      color: msg.isUser ? "white" : "black",
-                      borderRadius: 2
-                    }}
-                  >
-                    <Typography sx={{ textAlign: "start" }}>
-                      {msg.text}
-                    </Typography>
-                  </Paper>
-                  {msg.isUser && <UserIcon sx={{ mr: 1 }} />}
-                </Box>
+              />
+            </Toolbar>
+          </AppBar>
+          <Box sx={{ mt: 3 }}>
+            {/* Loading State */}
+            {loading && (
+              <Box sx={{ display: "flex", justifyContent: "center", mt: 4 }}>
+                <CircularProgress />
               </Box>
-            ))}
+            )}
+
+            {/* Empty/Error/Initial State */}
+            {!loading && searchResults.length === 0 && (
+              <Typography
+                variant="h6"
+                sx={{ color: "#004a92", textAlign: "center", mt: 4 }}
+              >
+                {error ? (
+                  error
+                ) : (
+                  <>
+                    Enter your query above and click{" "}
+                    <span style={{ fontWeight: "bold" }}>Search</span>
+                  </>
+                )}
+              </Typography>
+            )}
+
+            {/* Search Results */}
+            {!loading && searchResults.length > 0 && renderSearchResults()}
+
+            {/* Reset Button */}
+            {searchResults.length > 0 && (
+              <Button
+                variant="contained"
+                sx={{
+                  backgroundColor: "#ff0000",
+                  color: "#fff",
+                  position: "fixed",
+                  bottom: 20,
+                  left: 20
+                }}
+                startIcon={<RefreshIcon />}
+                onClick={resetSearch}
+              >
+                Reset
+              </Button>
+            )}
+
+            {/* Chat Button */}
+            {searchResults.length > 0 && !isChatOpen && (
+              <Button
+                variant="contained"
+                sx={{
+                  backgroundColor: "#004a92",
+                  color: "#fff",
+                  position: "fixed",
+                  bottom: 20,
+                  right: 20
+                }}
+                startIcon={<ChatIcon />}
+                onClick={() => setIsChatOpen(true)}
+              >
+                Chat with Bot
+              </Button>
+            )}
           </Box>
-          {chatLoading && (
+        </Box>
+
+        {/* Right Side: Chat Window */}
+        {isChatOpen && (
+          <Box
+            sx={{ flex: 1, p: 3, backgroundColor: "#f5f5f5", overflow: "auto" }}
+          >
             <Box
               sx={{
                 display: "flex",
-                justifyContent: "flex-start"
+                justifyContent: "space-between",
+                alignItems: "center",
+                mb: 2
               }}
             >
-              <Typography>Bot is typing...</Typography>
+              <Typography variant="h6" sx={{ color: "#004a92" }}>
+                Chat with Bot
+              </Typography>
+              <IconButton onClick={() => setIsChatOpen(false)}>
+                <CloseIcon sx={{ color: "#004a92" }} />
+              </IconButton>
             </Box>
-          )}
-          <Box sx={{ display: "flex", alignItems: "center" }}>
-            <TextField
-              fullWidth
-              placeholder="Type a message..."
-              variant="outlined"
-              value={chatInput}
-              onChange={(e) => setChatInput(e.target.value)}
-              onKeyPress={(e) => e.key === "Enter" && handleChatSend()}
-              sx={{ backgroundColor: "#fff", borderRadius: 1 }}
-              InputProps={{
-                endAdornment: (
-                  <IconButton onClick={handleChatSend}>
-                    <SendIcon sx={{ color: "#004a92" }} />
-                  </IconButton>
-                )
+            <Box
+              sx={{
+                height: "0.1vh",
+                overflow: "auto",
+                mb: 1,
+                backgroundColor: "#004a92"
               }}
-            />
-            <IconButton>
-              <MicIcon sx={{ color: "#004a92" }} />
-            </IconButton>
+            ></Box>
+            <Box sx={{ height: "70vh", overflow: "auto", mb: 2 }}>
+              {chatMessages.map((msg, index) => (
+                <Box
+                  key={index}
+                  sx={{
+                    display: "flex",
+                    justifyContent: msg.isUser ? "flex-end" : "flex-start",
+                    mb: 2
+                  }}
+                >
+                  <Box sx={{ display: "flex", alignItems: "center" }}>
+                    {!msg.isUser && <BotIcon sx={{ mr: 1 }} />}
+                    <Paper
+                      sx={{
+                        p: 2,
+                        backgroundColor: msg.isUser ? "#004a92" : "#e0e0e0",
+                        color: msg.isUser ? "white" : "black",
+                        borderRadius: 2
+                      }}
+                    >
+                      <Typography sx={{ textAlign: "start" }}>
+                        {msg.text}
+                      </Typography>
+                    </Paper>
+                    {msg.isUser && <UserIcon sx={{ mr: 1 }} />}
+                  </Box>
+                </Box>
+              ))}
+            </Box>
+            {chatLoading && (
+              <Box
+                sx={{
+                  display: "flex",
+                  justifyContent: "flex-start"
+                }}
+              >
+                <Typography>Bot is typing...</Typography>
+              </Box>
+            )}
+            <Box sx={{ display: "flex", alignItems: "center" }}>
+              <TextField
+                fullWidth
+                placeholder="Type a message..."
+                variant="outlined"
+                value={chatInput}
+                onChange={(e) => setChatInput(e.target.value)}
+                onKeyPress={(e) => e.key === "Enter" && handleChatSend()}
+                sx={{ backgroundColor: "#fff", borderRadius: 1 }}
+                InputProps={{
+                  endAdornment: (
+                    <IconButton onClick={handleChatSend}>
+                      <SendIcon sx={{ color: "#004a92" }} />
+                    </IconButton>
+                  )
+                }}
+              />
+              <IconButton>
+                <MicIcon sx={{ color: "#004a92" }} />
+              </IconButton>
+            </Box>
           </Box>
-        </Box>
-      )}
+        )}
 
-      {/* Error Snackbar */}
-      <Snackbar
-        open={!!error}
-        autoHideDuration={6000}
-        onClose={() => setError(null)}
-      >
-        <Alert severity="error" onClose={() => setError(null)}>
-          {error}
-        </Alert>
-      </Snackbar>
-    </Box>
+        {/* Error Snackbar */}
+        <Snackbar
+          open={!!error}
+          autoHideDuration={6000}
+          onClose={() => setError(null)}
+        >
+          <Alert severity="error" onClose={() => setError(null)}>
+            {error}
+          </Alert>
+        </Snackbar>
+      </Box>
+    </>
   );
 };
 
