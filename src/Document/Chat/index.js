@@ -389,7 +389,7 @@ const ChatBotPage = () => {
                     </Box>
                   </Box>
 
-                  {/**Block to show the chatbot source */}
+                  {/** Block to show the chatbot source */}
                   {!msg?.isUser && (
                     <Box sx={{ pl: 2 }}>
                       {" "}
