@@ -85,7 +85,7 @@ const ChatBotPage = () => {
       const response = await getSearchResults(message, "chatbot", sessionId);
       return {
         botResponse: response.content,
-        source: response?.metadata?.[0]?.doc_url,
+        source: response?.metadata?.[0]?.doc_url ?? '-',
       }; // Return the bot's response
     } catch (error) {
       console.error("Error fetching bot response:", error);
@@ -132,25 +132,29 @@ const ChatBotPage = () => {
                 {showFullText ? textResult.content : `${textPreview}`}
               </Markdown>
             </Typography>
-            {/* {textResult?.content?.length > 400 && ( */}
+            {textResult?.content?.length > 400 && (
               <>
                 <Button onClick={() => setShowFullText(!showFullText)}>
                   {showFullText ? "Show Less" : "Show More"}
                 </Button>
-                <Box
-                  sx={{
-                    mt: 2,
-                    p: 2,
-                    backgroundColor: "#f9f9f9",
-                    borderRadius: 2
-                  }}
-                >
-                  <Typography variant="body2" color="textSecondary">
-                    ⚠️ <b>Disclaimer:</b> This is an AI-generated response, which might be incorrect or incomplete at times. For a detailed and complete response, please refer to the references below.
-                  </Typography>
-                </Box>
               </>
-            {/* )} */}
+            )}
+
+            {/** Show the disclaimer always irespective of the length of result */}
+            <Box
+              sx={{
+                mt: 2,
+                p: 2,
+                backgroundColor: "#f9f9f9",
+                borderRadius: 2,
+              }}
+            >
+              <Typography variant="body2" color="textSecondary">
+                ⚠️ <b>Disclaimer:</b> This is an AI-generated response, which
+                might be incorrect or incomplete at times. For a detailed and
+                complete response, please refer to the references below.
+              </Typography>
+            </Box>
 
             {/* Metadata */}
             {textResult.metadata && (
@@ -404,7 +408,7 @@ const ChatBotPage = () => {
                         variant="body2"
                         color="text.primary"
                         component="span"
-                        sx={{ ml: 1, textDecoration: 'underline' }}
+                        sx={{ ml: 1, textDecoration: msg?.source?.length > 1 ? 'underline' : 'none'  }}
                       >
                         {msg?.source}
                       </Typography>
