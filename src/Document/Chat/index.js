@@ -24,13 +24,14 @@ import {
   SmartToy as BotIcon,
   AccountCircle as UserIcon,
   Close as CloseIcon,
-  Refresh as RefreshIcon,
+  Refresh as RefreshIcon
 } from "@mui/icons-material";
 import Markdown from "react-markdown";
 import { getSearchResults } from "../../API/calls/getSearchResult";
 import { generateSessionId, isValidURL } from "../../helper";
 import { useNavigate } from "react-router-dom";
 import BackButton from "../component/BackButton";
+import { getStrings } from "../common/strings";
 
 const ChatBotPage = () => {
   const [searchQuery, setSearchQuery] = useState("");
@@ -42,7 +43,7 @@ const ChatBotPage = () => {
   const [loading, setLoading] = useState(false); // Loading state
   const [error, setError] = useState(null); // Error state
   const [chatLoading, setChatLoading] = useState(false); // Loading state for chatbot
-
+  const STRINGS = getStrings('en'); //ToDo: Will map this in future with actual locale
   const sessionId = useRef(generateSessionId()).current;
   // Handle search API call
   const handleSearch = async (query) => {
@@ -128,9 +129,23 @@ const ChatBotPage = () => {
               </Markdown>
             </Typography>
             {textResult?.content?.length > 400 && (
-              <Button onClick={() => setShowFullText(!showFullText)}>
-                {showFullText ? "Show Less" : "Show More"}
-              </Button>
+              <>
+                <Button onClick={() => setShowFullText(!showFullText)}>
+                  {showFullText ? "Show Less" : "Show More"}
+                </Button>
+                <Box
+                  sx={{
+                    mt: 2,
+                    p: 2,
+                    backgroundColor: "#f9f9f9",
+                    borderRadius: 2
+                  }}
+                >
+                  <Typography variant="body2" color="textSecondary">
+                    ⚠️ <b>Disclaimer:</b> This is an AI-generated response, which might be incorrect or incomplete at times. For a detailed and complete response, please refer to the references below.
+                  </Typography>
+                </Box>
+              </>
             )}
 
             {/* Metadata */}
@@ -162,7 +177,7 @@ const ChatBotPage = () => {
                     {meta.deep_links && meta.deep_links.length > 0 && (
                       <Box sx={{ mt: 1 }}>
                         <Typography variant="body2">
-                          <strong>Deep Links:</strong>
+                          <strong>Links:</strong>
                         </Typography>
                         {meta.deep_links.map((link, idx) =>
                           isValidURL(link) ? (
@@ -184,17 +199,14 @@ const ChatBotPage = () => {
                       </Box>
                     )}
                     {isValidURL(meta.doc_url) && (
-                      <Button
-                        variant="contained"
-                        sx={{
-                          mt: 1,
-                          backgroundColor: "#004a92",
-                          color: "#fff"
-                        }}
-                        onClick={() => window.open(meta.doc_url, "_blank")}
-                      >
-                        View Document
-                      </Button>
+                      <Typography variant="body2">
+                        {STRINGS.source}:{" "}
+                        <strong>
+                          {meta.doc_url
+                            ?.replace("gs://ai-utilities-storage/chunk_job", "")
+                            .replace(/\//g, " → ")}
+                        </strong>
+                      </Typography>
                     )}
                   </Card>
                 ))}
@@ -347,7 +359,7 @@ const ChatBotPage = () => {
               }}
             ></Box>
             <Box sx={{ height: "70vh", overflow: "auto", mb: 2 }}>
-              {chatMessages.map((msg, index) => (
+              {chatMessages?.map((msg, index) => (
                 <Box
                   key={index}
                   sx={{
@@ -357,7 +369,7 @@ const ChatBotPage = () => {
                   }}
                 >
                   <Box sx={{ display: "flex", alignItems: "center" }}>
-                    {!msg.isUser && <BotIcon sx={{ mr: 1 }} />}
+                    {!msg?.isUser && <BotIcon sx={{ mr: 1 }} />}
                     <Paper
                       sx={{
                         p: 2,
@@ -366,11 +378,9 @@ const ChatBotPage = () => {
                         borderRadius: 2
                       }}
                     >
-                      <Typography sx={{ textAlign: "start" }}>
-                        {msg.text}
-                      </Typography>
+                      <Markdown>{msg?.text}</Markdown>
                     </Paper>
-                    {msg.isUser && <UserIcon sx={{ mr: 1 }} />}
+                    {msg?.isUser && <UserIcon sx={{ mr: 1 }} />}
                   </Box>
                 </Box>
               ))}
@@ -402,9 +412,9 @@ const ChatBotPage = () => {
                   )
                 }}
               />
-              <IconButton>
+              {/* <IconButton>
                 <MicIcon sx={{ color: "#004a92" }} />
-              </IconButton>
+              </IconButton> */}
             </Box>
           </Box>
         )}

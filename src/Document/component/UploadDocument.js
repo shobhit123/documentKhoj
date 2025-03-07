@@ -3,8 +3,9 @@ import { Box, Button, CircularProgress, Typography } from "@mui/material";
 import CloudUploadIcon from "@mui/icons-material/CloudUpload";
 import InsertDriveFileIcon from "@mui/icons-material/InsertDriveFile";
 import { uploadFileService } from "../../API/calls/uploadService";
+import { Delete } from "@mui/icons-material";
 
-const UploadDocument = ({ onUploadSuccess , STRINGS}) => {
+const UploadDocument = ({ onUploadSuccess, STRINGS }) => {
   const [file, setFile] = useState(null);
   const [uploadProgress, setUploadProgress] = useState(0);
   const [uploading, setUploading] = useState(false);
@@ -12,10 +13,10 @@ const UploadDocument = ({ onUploadSuccess , STRINGS}) => {
   const [filePreview, setFilePreview] = useState(null);
 
   const ALLOWED_TYPES = ["pdf", "docx", "xls"];
-  const MAX_SIZE = 10 * 1024 * 1024; 
+  const MAX_SIZE = 10 * 1024 * 1024;
 
-  const handleFileChange = (event) => {
-    const selectedFile = event.target.files[0];
+  const handleFileChange = (event) => {    
+    const selectedFile = event.target.files[0];    
     if (!selectedFile) return;
 
     const fileExtension = selectedFile.name.split(".").pop().toLowerCase();
@@ -64,6 +65,14 @@ const UploadDocument = ({ onUploadSuccess , STRINGS}) => {
     reader.onerror = () => {
       alert(STRINGS.fileReadError);
     };
+  };
+
+  const removeFile = () => {
+    setFile(null);
+    setFilePreview(null);
+    setResponse(null);
+    setUploadProgress(0);
+    setUploading(false)
   };
 
   const renderFilePreview = () => {
@@ -122,15 +131,25 @@ const UploadDocument = ({ onUploadSuccess , STRINGS}) => {
           )}
 
           {file && (
-            <Button
-              variant="contained"
-              startIcon={<CloudUploadIcon />}
-              onClick={uploadFile}
-              sx={styles.uploadButton}
-              disabled={uploading}
-            >
-              {STRINGS.uploadButton}
-            </Button>
+            <Box>
+              <Button
+                variant="contained"
+                startIcon={<CloudUploadIcon />}
+                onClick={uploadFile}
+                sx={styles.uploadButton}
+                disabled={uploading}
+              >
+                {STRINGS.uploadButton}
+              </Button>
+              {/* <Button
+                variant="outlined"
+                startIcon={<Delete />}
+                onClick={removeFile}
+                sx={styles.removeButton}
+              >
+                {STRINGS.removeFile}
+              </Button> */}
+            </Box>
           )}
 
           {uploading && (
@@ -165,6 +184,14 @@ const UploadDocument = ({ onUploadSuccess , STRINGS}) => {
         <Box>
           <Typography variant="body1" sx={styles.successMessage}>
             {STRINGS.documentUploadSuccess}
+          </Typography>
+          <Typography variant="body2">
+            {STRINGS.filePath}:{" "}
+            <strong>
+              {response?.object_path
+                ?.replace("gs://ai-utilities-storage/", "")
+                .replace(/\//g, " → ")}
+            </strong>
           </Typography>
         </Box>
       )}
@@ -237,6 +264,15 @@ export const styles = {
     color: "#388e3c",
     justifyContent: "center",
     marginTop: 1
+  },
+  removeButton: {
+    marginLeft: "10px",
+    backgroundColor: "#d32f2f",
+    color: "#fff",
+    marginLeft: "8px",
+    "&:hover": {
+      backgroundColor: "#b71c1c"
+    }
   }
 };
 

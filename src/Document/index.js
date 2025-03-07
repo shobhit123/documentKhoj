@@ -250,10 +250,10 @@ const DocumentUpload = () => {
               setDrawerOpen(false);
             }}
             sx={{
-              backgroundColor: "#f5f5f5", 
+              backgroundColor: "#f5f5f5",
               borderRadius: "4px",
               "&:hover": {
-                backgroundColor: "#e0e0e0" 
+                backgroundColor: "#e0e0e0"
               }
             }}
           >
@@ -262,7 +262,7 @@ const DocumentUpload = () => {
             </ListItemIcon>
             <ListItemText
               primary="Ask a Question or Chat with Us"
-              sx={{ cursor: "pointer", fontWeight: 500 }} 
+              sx={{ cursor: "pointer", fontWeight: 500 }}
             />
             <KeyboardArrowRight />
           </ListItem>

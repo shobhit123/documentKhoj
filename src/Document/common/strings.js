@@ -76,6 +76,8 @@ const locales = {
       chatWithUs: 'Chat with us...',
       something_went_wrong:
       "Something went wrong",
+      filePath: "File Path",
+      source:"Source"
   },
   hi: {
     title: "प्रश्न-उत्तर जनरेटर",
