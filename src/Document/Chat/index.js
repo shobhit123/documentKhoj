@@ -47,6 +47,7 @@ const ChatBotPage = () => {
   const sessionId = useRef(generateSessionId()).current;
   // Handle search API call
   const handleSearch = async (query) => {
+    setChatMessages([]); // clearing the chatbot results for fresh search results
     if (!query.trim()) {
       setSearchResults([]);
       return;
@@ -82,7 +83,10 @@ const ChatBotPage = () => {
   const fetchBotResponse = async (message) => {
     try {
       const response = await getSearchResults(message, "chatbot", sessionId);
-      return response.content; // Return the bot's response
+      return {
+        botResponse: response.content,
+        source: response?.metadata?.[0]?.doc_url ?? '-',
+      }; // Return the bot's response
     } catch (error) {
       console.error("Error fetching bot response:", error);
       return "Sorry, I couldn't process your request.";
@@ -96,8 +100,8 @@ const ChatBotPage = () => {
     const userMessage = { text: chatInput, isUser: true };
     setChatMessages([...chatMessages, userMessage]);
     setChatInput("");
-    const botResponse = await fetchBotResponse(chatInput);
-    setChatMessages((prev) => [...prev, { text: botResponse, isUser: false }]);
+    const { botResponse, source } = await fetchBotResponse(chatInput);
+    setChatMessages((prev) => [...prev, { text: botResponse, isUser: false, source }]);
     setChatLoading(false);
   };
 
@@ -133,20 +137,24 @@ const ChatBotPage = () => {
                 <Button onClick={() => setShowFullText(!showFullText)}>
                   {showFullText ? "Show Less" : "Show More"}
                 </Button>
-                <Box
-                  sx={{
-                    mt: 2,
-                    p: 2,
-                    backgroundColor: "#f9f9f9",
-                    borderRadius: 2
-                  }}
-                >
-                  <Typography variant="body2" color="textSecondary">
-                    ⚠️ <b>Disclaimer:</b> This is an AI-generated response, which might be incorrect or incomplete at times. For a detailed and complete response, please refer to the references below.
-                  </Typography>
-                </Box>
               </>
             )}
+
+            {/** Show the disclaimer always irespective of the length of result */}
+            <Box
+              sx={{
+                mt: 2,
+                p: 2,
+                backgroundColor: "#f9f9f9",
+                borderRadius: 2,
+              }}
+            >
+              <Typography variant="body2" color="textSecondary">
+                ⚠️ <b>Disclaimer:</b> This is an AI-generated response, which
+                might be incorrect or incomplete at times. For a detailed and
+                complete response, please refer to the references below.
+              </Typography>
+            </Box>
 
             {/* Metadata */}
             {textResult.metadata && (
@@ -360,29 +368,53 @@ const ChatBotPage = () => {
             ></Box>
             <Box sx={{ height: "70vh", overflow: "auto", mb: 2 }}>
               {chatMessages?.map((msg, index) => (
-                <Box
-                  key={index}
-                  sx={{
-                    display: "flex",
-                    justifyContent: msg.isUser ? "flex-end" : "flex-start",
-                    mb: 2
-                  }}
-                >
-                  <Box sx={{ display: "flex", alignItems: "center" }}>
-                    {!msg?.isUser && <BotIcon sx={{ mr: 1 }} />}
-                    <Paper
-                      sx={{
-                        p: 2,
-                        backgroundColor: msg.isUser ? "#004a92" : "#e0e0e0",
-                        color: msg.isUser ? "white" : "black",
-                        borderRadius: 2
-                      }}
-                    >
-                      <Markdown>{msg?.text}</Markdown>
-                    </Paper>
-                    {msg?.isUser && <UserIcon sx={{ mr: 1 }} />}
+                <>
+                  <Box
+                    key={index}
+                    sx={{
+                      display: "flex",
+                      justifyContent: msg.isUser ? "flex-end" : "flex-start",
+                      mb: 2
+                    }}
+                  >
+                    <Box sx={{ display: "flex", alignItems: "center" }}>
+                      {!msg?.isUser && <BotIcon sx={{ mr: 1 }} />}
+                      <Paper
+                        sx={{
+                          p: 2,
+                          backgroundColor: msg.isUser ? "#004a92" : "#e0e0e0",
+                          color: msg.isUser ? "white" : "black",
+                          borderRadius: 2
+                        }}
+                      >
+                        <Markdown>{msg?.text}</Markdown>
+                      </Paper>
+                      {msg?.isUser && <UserIcon sx={{ mr: 1 }} />}
+                    </Box>
                   </Box>
-                </Box>
+
+                  {/** Block to show the chatbot source */}
+                  {!msg?.isUser && (
+                    <Box sx={{ pl: 2 }}>
+                      {" "}
+                      <Typography
+                        variant="body3"
+                        color="text.secondary"
+                        component="span"
+                      >
+                        {STRINGS.source}:{" "}
+                      </Typography>
+                      <Typography
+                        variant="body2"
+                        color="text.primary"
+                        component="span"
+                        sx={{ ml: 1, textDecoration: msg?.source?.length > 1 ? 'underline' : 'none'  }}
+                      >
+                        {msg?.source}
+                      </Typography>
+                    </Box>
+                  )}
+                </>
               ))}
             </Box>
             {chatLoading && (
