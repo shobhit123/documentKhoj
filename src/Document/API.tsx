@@ -8,10 +8,11 @@ const api = axios.create({
     "Content-Type": "application/json",
   }
 });
-export const apiRequest = async (endpoint, method = "GET", data = {}, customHeaders = {}) => {
+export const apiRequest = async (endpoint: string, method = "GET", data = {}, customHeaders = {}) => {
   try {
     const response = await api({
-      url:  `${BASE_URL}${endpoint}`,
+      // url:  `${BASE_URL}${endpoint}`,
+      url:  `${endpoint}`,
       method,
       data,
       headers: {
@@ -19,7 +20,7 @@ export const apiRequest = async (endpoint, method = "GET", data = {}, customHead
       },
     });
     return response.data;
-  } catch (error) {
+  } catch (error:any) {
     console.error("API Error:", error?.response || error?.message);
   }
 };

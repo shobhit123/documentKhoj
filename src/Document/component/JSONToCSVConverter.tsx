@@ -1,17 +1,24 @@
-import {  FileUpload } from "@mui/icons-material";
+import { FileUpload } from "@mui/icons-material";
 import { Button } from "@mui/material";
 import React from "react";
 
-const convertToCSV = (objArray) => {
-  const array = typeof objArray !== "object" ? JSON.parse(objArray) : objArray;
+type JSONToCSVConverterProps = {
+  jsonData: Record<string, any>[];
+  fileName?: string;
+};
+
+const convertToCSV = (objArray: Record<string, any>[]): string => {
+  const array = Array.isArray(objArray) ? objArray : JSON.parse(objArray);
   let str = "";
+
+  if (array.length === 0) return str;
 
   // Add headers
   const headers = Object.keys(array[0]);
   str += headers.join(",") + "\r\n";
 
   // Add rows
-  array.forEach((item) => {
+  array.forEach((item: Record<string, string | number | null | undefined>) => {
     const row = headers.map((header) => {
       return `"${item[header]}"`;
     });
@@ -21,7 +28,7 @@ const convertToCSV = (objArray) => {
   return str;
 };
 
-const JSONToCSVConverter = ({ jsonData, fileName }) => {
+const JSONToCSVConverter: React.FC<JSONToCSVConverterProps> = ({ jsonData, fileName }) => {
   const downloadCSV = () => {
     if (!jsonData || jsonData.length === 0) {
       alert("No data to export!");

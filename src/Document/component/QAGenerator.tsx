@@ -26,7 +26,26 @@ import ReferencesCard from "./ReferencesCard";
 import JSONToCSVConverter from "./JSONToCSVConverter";
 import CSVtoJSONConverter from "./CSVToJSONConverter";
 
-const QAGenerator = ({
+type QA = {
+  question: string;
+  answer: string;
+  pageNumber?: string | number;
+  pageSection?: string;
+  references: string[];
+  is_llm_generated?: boolean;
+  tags: string[];
+  question_guidance?: string;
+};
+
+type QAGeneratorProps = {
+  document: { qaList: QA[] };
+  onQaListChange: (type: string, tags: string[], updatedList: QA[]) => void;
+  STRINGS: Record<string, string>;
+  onEditDetails: () => void;
+  onAddNewQuestionSelected: (isAdding: boolean) => void;
+};
+
+const QAGenerator : React.FC<QAGeneratorProps> = ({
   document,
   onQaListChange,
   STRINGS,
@@ -34,10 +53,10 @@ const QAGenerator = ({
   onAddNewQuestionSelected
 }) => {
   // const [qaList, setQaList] = useState(document?.qaList || []);
-  const [qaList, setQaList] = useState([]);
+  const [qaList, setQaList] = useState<QA[]>([]);
   const [addNewQuestion, setAddNewQuestion] = useState(false);
   const [editIndex, setEditIndex] = useState(null);
-  const [currentQA, setCurrentQA] = useState({
+  const [currentQA, setCurrentQA] = useState<QA>({
     question: "",
     answer: "",
     pageNumber: "",
@@ -48,7 +67,7 @@ const QAGenerator = ({
     question_guidance: ""
   });
   const [showSnackbar, setShowSnackbar] = useState(false);
-  const [newReferences, setNewReferences] = useState({});
+  const [newReferences, setNewReferences] = useState<Record<number, string>>({});
   const [newReferenceQuestion, setNewReferenceQuestion] = useState("");
 
   useEffect(() => {
@@ -94,7 +113,7 @@ const QAGenerator = ({
     onAddNewQuestionSelected(false);
   };
 
-  const handleTagsChange = (newTags) => {
+  const handleTagsChange = (newTags : string[]) => {
     setCurrentQA((prevQA) => ({
       ...prevQA,
       tags: newTags
@@ -110,7 +129,7 @@ const QAGenerator = ({
     }
   };
 
-  const handleDeleteQA = (index) => {
+  const handleDeleteQA = (index: number) => {
     const confirmDelete = window.confirm(STRINGS.sureToDelete);
     if (confirmDelete) {
       const updatedList = qaList.filter((_, i) => i !== index);
@@ -125,11 +144,12 @@ const QAGenerator = ({
       setShowSnackbar(true);
     } else {
       onAddNewQuestionSelected(true);
-      handleAddNewQuestion(true);
+      // handleAddNewQuestion(true);
+      handleAddNewQuestion(null); //todo: check functionality
     }
   };
 
-  const handleAddReference = (index) => {
+  const handleAddReference = (index: number) => {
     const referenceText = newReferences[index]?.trim();
     if (referenceText) {
       const updatedReferences = [...qaList[index].references, referenceText];
@@ -286,7 +306,8 @@ const QAGenerator = ({
                           style={{
                             backgroundColor: "#1976d2",
                             borderRadius: 4,
-                            paddingHorizontal: 8
+                            paddingLeft: 8,
+                            paddingRight: 8
                           }}
                         >
                           <IconButton
@@ -308,9 +329,10 @@ const QAGenerator = ({
 
                   {qa.references.map((reference, refIndex) => (
                     <ReferencesCard
+                      index={refIndex}
                       key={refIndex}
                       reference={reference}
-                      STRINGS={STRINGS}
+                      // STRINGS={STRINGS}
                     />
                   ))}
                   <TagInput
@@ -402,7 +424,8 @@ const QAGenerator = ({
                   style={{
                     backgroundColor: "#1976d2",
                     borderRadius: 4,
-                    paddingHorizontal: 8
+                    paddingLeft: 8,
+                    paddingRight: 8
                   }}
                 >
                   <IconButton
@@ -423,9 +446,10 @@ const QAGenerator = ({
           />
           {currentQA?.references?.map((reference, refIndex) => (
             <ReferencesCard
+              index={refIndex}
               key={refIndex}
               reference={reference}
-              STRINGS={STRINGS}
+              // STRINGS={STRINGS}
             />
           ))}
 

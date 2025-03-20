@@ -1,4 +1,4 @@
-const locales = {
+const locales: Record<'en' | 'hi', { [key: string]: string }> = {
   en: {
     title: "Q&A Generator",
     description: "Generate Q&A based on uploaded documents",
@@ -69,15 +69,17 @@ const locales = {
     confirmation_generateJourney:
       "Are you sure you want to regenerate the question? \n\nThis will generate a new set of questions based on your inputs.",
     generatedQuestion: "Generated Questions",
-    referencesLabel: "Add Reference",
+    // referencesLabel: "Add Reference",
     add: "Add",
+    search: "Search",
     somethingWentWrong:
       "Something went wrong! \nPlease reUpload the file again.",
       chatWithUs: 'Chat with us...',
       something_went_wrong:
       "Something went wrong",
       filePath: "File Path",
-      source:"Source"
+      source:"Source",
+      references: 'References'
   },
   hi: {
     title: "प्रश्न-उत्तर जनरेटर",
@@ -150,14 +152,17 @@ const locales = {
     confirmation_generateJourney:
       "क्या आप वाकई प्रश्नों को पुनः उत्पन्न करना चाहते हैं? \n\nयह आपके इनपुट के आधार पर एक नया प्रश्न सेट उत्पन्न करेगा।",
     generatedQuestion: "उत्पन्न प्रश्न",
-    referencesLabel: "संदर्भ जोड़ें",
+    // referencesLabel: "संदर्भ जोड़ें",
     add: "जोड़ें",
     somethingWentWrong: "कुछ गलत हो गया! \nकृपया फ़ाइल को पुनः अपलोड करें।",
-    chatWithUs: 'Chat with us...'
+    chatWithUs: 'Chat with us...',
+    source: 'स्रोत',
+    references: 'संदर्भ',
+    search: 'खोज'
   }
 };
 
 // Function to get strings based on the selected locale
-export const getStrings = (locale) => {
-  return locales[locale];
+export const getStrings = (locale: keyof typeof locales)  => {
+  return locales[locale] ;
 };

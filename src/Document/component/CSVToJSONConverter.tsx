@@ -1,13 +1,27 @@
-import React from "react";
+import React, { ChangeEvent } from "react";
 import Papa from "papaparse";
 import { Button } from "@mui/material";
 import { FileDownload } from "@mui/icons-material";
 
-const CSVtoJSONConverter = ({ onQaListChange, STRINGS }) => {
-  const handleFileUpload = (event) => {
-    const file = event.target.files[0];
+interface CSVtoJSONConverterProps {
+  onQaListChange: (data: QaItem[]) => void;
+  STRINGS: Record<string, string>
+}
+
+interface QaItem {
+  question: string;
+  answer: string;
+  pageNumber: number;
+  pageSection: string;
+  references: string[];
+  tags: string[];
+}
+
+const CSVtoJSONConverter: React.FC<CSVtoJSONConverterProps> = ({ onQaListChange, STRINGS }) => {
+  const handleFileUpload = (event: ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
     if (file) {
-      Papa.parse(file, {
+      Papa.parse<QaItem>(file, {
         header: true,
         dynamicTyping: true,
         complete: (results) => {
@@ -24,8 +38,8 @@ const CSVtoJSONConverter = ({ onQaListChange, STRINGS }) => {
     }
   };
 
-  const validateAndProcessData = (data) => {
-    const requiredKeys = [
+  const validateAndProcessData = (data: Partial<QaItem>[]) => {
+    const requiredKeys: (keyof QaItem)[] = [
       "question",
       "answer",
       "pageNumber",
@@ -33,25 +47,23 @@ const CSVtoJSONConverter = ({ onQaListChange, STRINGS }) => {
       "references",
       "tags"
     ];
-    const missingKeysAlert = [];
+    const missingKeysAlert: string[] = [];
 
-    const processedData = data
+    const processedData: QaItem[] = data
       .filter((item) => item.question !== null)
       .map((item, index) => {
         const missingKeys = requiredKeys.filter((key) => !(key in item));
 
         if (missingKeys.length > 0) {
           missingKeysAlert.push(
-            `Object at index ${index} is missing keys: ${missingKeys.join(
-              ", "
-            )}`
+            `Object at index ${index} is missing keys: ${missingKeys.join(", ")}`
           );
         }
 
         return {
           question: item.question || "",
           answer: item.answer || "",
-          pageNumber: item.pageNumber || 0,
+          pageNumber: item.pageNumber ?? 0,
           pageSection: item.pageSection || "",
           references: Array.isArray(item.references) ? item.references : [],
           tags: Array.isArray(item.tags) ? item.tags : []
