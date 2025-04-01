@@ -1,5 +1,5 @@
 import React from "react";
-import { useTheme } from "./ThemeContext";
+import { useTheme } from "./themeContext";
 import { Switch, Paper, Box } from "@mui/material";
 import { Brightness4, Brightness7 } from "@mui/icons-material";
 

@@ -1,6 +1,6 @@
-import { apiRequest } from "../../src/Document/API";
+import { apiRequest } from "src/api/apiRequest";
 import { transformDataForApi } from "../../src/helper";
-import { API_ENDPOINTS } from "../../src/API/apiEndpoints";
+import { API_ENDPOINTS } from "../api/apiEndpoints";
 
 interface DocumentUpload<T = any> {
   documentName?: string;

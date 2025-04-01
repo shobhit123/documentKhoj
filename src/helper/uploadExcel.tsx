@@ -2,24 +2,39 @@ import React, { useState } from "react";
 import { Box, Button, CircularProgress, Typography } from "@mui/material";
 import CloudUploadIcon from "@mui/icons-material/CloudUpload";
 import InsertDriveFileIcon from "@mui/icons-material/InsertDriveFile";
-import { uploadFileService } from "../../API/calls/uploadService";
+import { uploadFileService } from "src/services/uploadService";
 
-const UploadExcel = ({ onUploadSuccess, STRINGS }) => {
-  const [file, setFile] = useState(null);
-  const [uploadProgress, setUploadProgress] = useState(0);
-  const [uploading, setUploading] = useState(false);
-  const [response, setResponse] = useState(null);
-  const [filePreview, setFilePreview] = useState(null);
+interface UploadExcelProps {
+  onUploadSuccess: (response: any, fileType: string) => void;
+  STRINGS: {
+    invalidFileType: string;
+    fileSizeExceeded: string;
+    selectFileFirst: string;
+    uploadFailed: string;
+    fileReadError: string;
+    selectFile: string;
+    uploadButton: string;
+    uploading: string;
+    documentUploadSuccess: string;
+  };
+}
+
+const UploadExcel: React.FC<UploadExcelProps> = ({ onUploadSuccess, STRINGS }) => {
+  const [file, setFile] = useState<File | null>(null);
+  const [uploadProgress, setUploadProgress] = useState<number>(0);
+  const [uploading, setUploading] = useState<boolean>(false);
+  const [response, setResponse] = useState<any>(null);
+  const [filePreview, setFilePreview] = useState<string | null>(null);
 
   const ALLOWED_TYPES = ["xls", "csv"];
   const MAX_SIZE = 10 * 1024 * 1024; // 10MB
 
-  const handleFileChange = (event) => {
-    const selectedFile = event.target.files[0];
+  const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const selectedFile = event.target.files?.[0];
     if (!selectedFile) return;
 
-    const fileExtension = selectedFile.name.split(".").pop().toLowerCase();
-    if (!ALLOWED_TYPES.includes(fileExtension)) {
+    const fileExtension = selectedFile.name.split(".").pop()?.toLowerCase();
+    if (!fileExtension || !ALLOWED_TYPES.includes(fileExtension)) {
       alert(STRINGS.invalidFileType);
       return;
     }
@@ -42,15 +57,12 @@ const UploadExcel = ({ onUploadSuccess, STRINGS }) => {
     const reader = new FileReader();
     reader.readAsDataURL(file);
     reader.onload = async () => {
-      const base64Data = reader.result.split(",")[1];
+      const base64Data = (reader.result as string).split(",")[1];
       setUploading(true);
       setUploadProgress(0);
+
       try {
-        const response = await uploadFileService(
-          base64Data,
-          file.name,
-          file.type
-        );
+        const response = await uploadFileService(base64Data, file.name, file.type);
         setResponse(response);
         onUploadSuccess(response, file.type);
       } catch (error) {
@@ -67,14 +79,7 @@ const UploadExcel = ({ onUploadSuccess, STRINGS }) => {
   };
 
   return (
-    <Box
-      sx={{
-        display: "flex",
-        flexDirection: "column",
-        gap: "10px",
-        borderRadius: "10px"
-      }}
-    >
+    <Box sx={{ display: "flex", flexDirection: "column", gap: "10px", borderRadius: "10px" }}>
       {!filePreview && (
         <Box>
           <input
@@ -85,12 +90,7 @@ const UploadExcel = ({ onUploadSuccess, STRINGS }) => {
             id="upload-file-input"
           />
           <label htmlFor="upload-file-input">
-            <Button
-              variant="outlined"
-              component="span"
-              startIcon={<InsertDriveFileIcon />}
-              sx={styles.selectFileButton}
-            >
+            <Button variant="outlined" component="span" startIcon={<InsertDriveFileIcon />} sx={styles.selectFileButton}>
               {STRINGS.selectFile}
             </Button>
           </label>
@@ -115,11 +115,7 @@ const UploadExcel = ({ onUploadSuccess, STRINGS }) => {
 
           {uploading && (
             <Box sx={styles.uploadProgressContainer}>
-              <CircularProgress
-                variant="determinate"
-                value={uploadProgress}
-                sx={styles.progress}
-              />
+              <CircularProgress variant="determinate" value={uploadProgress} sx={styles.progress} />
               <Typography variant="body2" sx={styles.uploadingText}>
                 {STRINGS.uploading}
               </Typography>
@@ -129,11 +125,7 @@ const UploadExcel = ({ onUploadSuccess, STRINGS }) => {
       )}
       {uploading && (
         <Box sx={styles.uploadProgressContainer}>
-          <CircularProgress
-            variant="determinate"
-            value={uploadProgress}
-            sx={styles.progress}
-          />
+          <CircularProgress variant="determinate" value={uploadProgress} sx={styles.progress} />
           <Typography variant="body2" sx={styles.uploadingText}>
             {STRINGS.uploading}
           </Typography>
@@ -158,7 +150,7 @@ export const styles = {
     justifyContent: "center",
     gap: "10px",
     borderRadius: "10px",
-    margin: "auto"
+    margin: "auto",
   },
   selectFileButton: {
     width: "100%",
@@ -166,31 +158,31 @@ export const styles = {
     backgroundColor: "#1976d2",
     color: "#fff",
     "&:hover": {
-      backgroundColor: "#1565c0"
+      backgroundColor: "#1565c0",
     },
-    marginBottom: 1
+    marginBottom: 1,
   },
   uploadingText: {
     fontSize: "14px",
     color: "#888",
-    marginTop: "10px"
+    marginTop: "10px",
   },
   uploadButton: {
     padding: "12px 20px",
     backgroundColor: "#4caf50",
     color: "#fff",
     "&:hover": {
-      backgroundColor: "#388e3c"
-    }
+      backgroundColor: "#388e3c",
+    },
   },
   uploadProgressContainer: {
     display: "flex",
     flexDirection: "column",
     alignItems: "center",
-    gap: "10px"
+    gap: "10px",
   },
   progress: {
-    marginBottom: "10px"
+    marginBottom: "10px",
   },
   previewContainer: {
     display: "flex",
@@ -202,20 +194,20 @@ export const styles = {
     borderRadius: "8px",
     boxShadow: "0 2px 6px rgba(0, 0, 0, 0.1)",
     width: "90%",
-    marginTop: 4
+    marginTop: 4,
   },
   imagePreview: {
     maxWidth: "100%",
     maxHeight: "200px",
-    objectFit: "contain"
+    objectFit: "contain",
   },
   successMessage: {
     display: "flex",
     alignItems: "center",
     color: "#388e3c",
     justifyContent: "center",
-    marginTop: 1
-  }
+    marginTop: 1,
+  },
 };
 
 export default UploadExcel;

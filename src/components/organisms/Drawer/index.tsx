@@ -4,6 +4,8 @@ import {
   Accordion,
   AccordionDetails,
   AccordionSummary,
+  Box,
+  Divider,
   Drawer as MUIDrawer,
   List,
   ListItem,
@@ -19,24 +21,26 @@ import {
   Palette as PaletteIcon,
   Language as LanguageIcon,
 } from "@mui/icons-material";
-import ThemeToggleButton from "src/providers/theme/ThemeToggleButton";
-import LanguageToggleButton from "src/providers/language/LanguageToggleButton";
-import { useLanguage } from "src/providers/language/LanguageContext";
+import ThumbUpIcon from "@mui/icons-material/ThumbUp";
+import CloudUploadIcon from "@mui/icons-material/CloudUpload";
+import ThemeToggleButton from "src/providers/theme/themeToggleButton";
+import LanguageToggleButton from "src/providers/language/languageToggleButton";
+import { useLanguage } from "src/providers/language/languageContext";
 
 type DrawerProps = {
   drawerOpen: boolean;
   toggleDrawer: (open: boolean) => () => void;
-//   isToggleOn: boolean;
+  //   isToggleOn: boolean;
 };
 
 const Drawer: React.FC<DrawerProps> = ({
   drawerOpen,
   toggleDrawer,
-//   isToggleOn,
+  //   isToggleOn,
 }) => {
   const navigate = useNavigate();
   const [accordionExpanded, setAccordionExpanded] = useState(false);
-  const { language, toggleLanguage} = useLanguage()
+  const { language, toggleLanguage } = useLanguage();
 
   return (
     <MUIDrawer
@@ -73,43 +77,105 @@ const Drawer: React.FC<DrawerProps> = ({
           <KeyboardArrowRight />
         </ListItem>
 
+        {/** Evaluate Section */}
+        <ListItem
+          onClick={() => {
+            navigate("/feedback");
+            toggleDrawer(false)();
+          }}
+          sx={{
+            borderRadius: "8px",
+            "&:hover": { backgroundColor: "#f0f0f0" },
+            cursor: "pointer",
+          }}
+        >
+          <ListItemIcon>
+            <ThumbUpIcon color="primary" />
+          </ListItemIcon>
+          <ListItemText primary="Feedback" />
+          <KeyboardArrowRight />
+        </ListItem>
+
+        {/** Bulk Upload Section */}
+        <ListItem
+          onClick={() => {
+            navigate("/bulkUpload");
+            toggleDrawer(false)();
+          }}
+          sx={{
+            borderRadius: "8px",
+            "&:hover": { backgroundColor: "#f0f0f0" },
+            cursor: "pointer",
+          }}
+        >
+          <ListItemIcon>
+            <CloudUploadIcon color="primary" />
+          </ListItemIcon>
+          <ListItemText primary="Bulk Upload" />
+          <KeyboardArrowRight />
+        </ListItem>
+
         {/* Settings Accordion */}
         <Accordion
           expanded={accordionExpanded}
           onChange={() => setAccordionExpanded(!accordionExpanded)}
           sx={{
-            borderRadius: "8px",
+            borderRadius: "6px",
             "&:before": { display: "none" },
             boxShadow: "none",
+            border: "1px solid #E0E0E0", // Light border for structure
+            backgroundColor: "#F8F9FA", // Subtle background
           }}
         >
-          <AccordionSummary expandIcon={<ExpandMoreIcon />}>
-            <ListItemIcon>
-              <SettingsIcon color="primary" />
-            </ListItemIcon>
-            <Typography variant="body1">Settings</Typography>
-          </AccordionSummary>
-          <AccordionDetails sx={{ paddingLeft: "16px" }}>
-            {/* Theme Menu */}
-            <ListItem>
-              <ListItemIcon>
-                <PaletteIcon color="secondary" />
-              </ListItemIcon>
-              <ListItemText primary="Theme" />
-            </ListItem>
-            <ThemeToggleButton compact={true} />
-
-            {/* Language Menu */}
-            <ListItem component="div">
-              <ListItemIcon>
-                <LanguageIcon color="secondary" />
-              </ListItemIcon>
-              <ListItemText primary="Language" />
-            </ListItem>
-            <LanguageToggleButton
-              toggleLanguage={toggleLanguage}
-              selectedLanguage={language}
+          <AccordionSummary
+            expandIcon={<ExpandMoreIcon sx={{ color: "#004C8F" }} />}
+            sx={{
+              padding: "8px 16px",
+              minHeight: "48px",
+              "& .MuiTypography-root": { fontSize: "14px", fontWeight: 500 },
+            }}
+          >
+            <SettingsIcon
+              sx={{ fontSize: 20, color: "#004C8F", marginRight: "8px" }}
             />
+            <Typography variant="body2">Settings</Typography>
+          </AccordionSummary>
+
+          <AccordionDetails sx={{ padding: "8px 16px" }}>
+            {/* Theme Section */}
+            <Box
+              display="flex"
+              alignItems="center"
+              justifyContent="space-between"
+            >
+              <Box display="flex" alignItems="center">
+                <PaletteIcon
+                  sx={{ fontSize: 18, color: "#004C8F", marginRight: "8px" }}
+                />
+                <Typography variant="body2">Theme</Typography>
+              </Box>
+              <ThemeToggleButton compact={true} />
+            </Box>
+
+            <Divider sx={{ marginY: "8px" }} />
+
+            {/* Language Section */}
+            <Box
+              display="flex"
+              alignItems="center"
+              justifyContent="space-between"
+            >
+              <Box display="flex" alignItems="center">
+                <LanguageIcon
+                  sx={{ fontSize: 18, color: "#004C8F", marginRight: "8px" }}
+                />
+                <Typography variant="body2">Language</Typography>
+              </Box>
+              <LanguageToggleButton
+                toggleLanguage={toggleLanguage}
+                selectedLanguage={language}
+              />
+            </Box>
           </AccordionDetails>
         </Accordion>
       </List>

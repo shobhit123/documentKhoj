@@ -21,10 +21,10 @@ import {
   Label as LabelIcon,
   Add
 } from "@mui/icons-material";
-import TagInput from "./TagInput";
-import ReferencesCard from "./ReferencesCard";
-import JSONToCSVConverter from "./JSONToCSVConverter";
-import CSVtoJSONConverter from "./CSVToJSONConverter";
+import TagInput from "./tagInput";
+import ReferencesCard from "./referencesCard";
+import JSONToCSVConverter from "./jsonToCSVConverter";
+import CSVtoJSONConverter from "./csvToJSONConverter";
 
 type QA = {
   question: string;

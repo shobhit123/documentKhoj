@@ -1,6 +1,6 @@
 import { useState, useRef } from 'react';
-import { useLanguage } from 'src/providers/language/LanguageContext';
-import { getStrings } from "../../Document/common/strings";
+import { getStrings } from 'src/helper/strings';
+import { useLanguage } from 'src/providers/language/languageContext';
 import { generateSessionId } from "../../helper";
 import { fetchBotResponse } from './chatService';
 
@@ -35,13 +35,6 @@ const useChatHook = () => {
 
     const STRINGS = getStrings(language)
     const sessionId = useRef(generateSessionId()).current;
-
-    const [drawerOpen, setDrawerOpen] = useState(false);
-
-    const toggleDrawer = (open: any) => () => {
-      //todo:
-      setDrawerOpen(open);
-    };
 
     // Handle chat send
   const handleChatSend = async () => {
@@ -90,8 +83,6 @@ const useChatHook = () => {
         chatLoading,
         chatInput,
         setChatInput,
-        drawerOpen,
-        toggleDrawer
     }
 };
 

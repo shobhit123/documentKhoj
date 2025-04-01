@@ -20,7 +20,7 @@ export const LanguageProvider: React.FC<{ children: ReactNode }> = ({ children }
   }, [language]);
 
   const toggleLanguage = () => {
-    setLanguage((prevLanguage) => (prevLanguage === "en" ? "hi" : "en"));
+    setLanguage((prevLanguage) => (prevLanguage === "en" ? "hi" : "en")); //dynamic language change
     setIsToggleOn(!isToggleOn);
   };
 

@@ -1,0 +1,170 @@
+.table-wrapper {
+  display: flex;
+  justify-content: center;
+  overflow-x: auto;
+  padding: 16px;
+  background-color: #f4f7fb; /* Soft background */
+}
+
+.table-container {
+  width: fit-content;
+  min-width: 95vw;
+  max-width: 100%;
+  border: 1px solid #c4c4c4;
+  box-shadow: 2px 2px 8px rgba(0, 0, 0, 0.08);
+  border-radius: 6px;
+  background-color: white;
+  overflow-x: auto;
+  margin: 24px;
+  transition: all 0.2s ease-in-out;
+}
+
+.table-container:hover {
+  box-shadow: 3px 3px 10px rgba(0, 0, 0, 0.12);
+}
+
+.table {
+  border-collapse: collapse;
+  width: 100%;
+}
+
+.table-header {
+  background-color: #dfe7f2; /* Softer blue-gray */
+  font-size: 13px;
+  font-weight: 600;
+  text-align: left;
+  padding: 8px 12px;
+  border: 1px solid #c4c4c4;
+  white-space: nowrap;
+  position: sticky;
+  top: 0;
+  z-index: 2;
+  color: #333;
+}
+
+.table-cell {
+  font-size: 11px !important;
+  padding: 6px 10px;
+  border: 1px solid #d1d1d1;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  overflow: hidden;
+  max-width: 160px;
+  transition: background 0.2s ease-in-out;
+}
+
+/* Sticky First Column */
+.table-cell:first-child,
+.table-header:first-child {
+  position: sticky;
+  left: 0;
+  background-color: #f1f5f9; /* Light grayish-blue */
+  z-index: 3;
+  box-shadow: 2px 0px 5px rgba(0, 0, 0, 0.08);
+}
+
+/* Improved Hover Effects */
+.table-cell:hover {
+  background-color: #e7f3ff; /* Light blue tint */
+}
+
+.table-row:nth-child(even) {
+  background-color: #f9fafc; /* Softer alternating row color */
+}
+
+.table-row:hover {
+  background-color: #d8e9ff; /* Brighter hover effect */
+}
+
+/* Refined Tooltip */
+.tooltip {
+  position: relative;
+  cursor: pointer;
+  font-weight: 500;
+  color: #444;
+}
+
+.tooltip::after {
+  content: attr(data-text);
+  visibility: hidden;
+  position: absolute;
+  background: rgba(0, 0, 0, 0.85);
+  color: white;
+  text-align: center;
+  padding: 6px 10px;
+  border-radius: 4px;
+  font-size: 11px;
+  bottom: 120%;
+  left: 50%;
+  transform: translateX(-50%);
+  width: max-content;
+  max-width: 240px;
+  white-space: normal;
+  z-index: 10;
+  opacity: 0;
+  transition: opacity 0.2s ease-in-out;
+}
+
+.tooltip:hover::after {
+  visibility: visible;
+  opacity: 1;
+}
+
+/* Select Field Styling */
+.select-field {
+  font-size: 12px;
+  min-width: 70px;
+  text-align: center;
+  padding: 4px;
+  border-radius: 4px;
+  background: #f5f7fa;
+  transition: all 0.2s ease-in-out;
+}
+
+.select-field:focus {
+  background: #dfe7f2;
+}
+
+/* TextField Styling */
+.text-field {
+  font-size: 12px;
+  padding: 6px 8px;
+  border: 1px solid #d1d1d1;
+  border-radius: 4px;
+  transition: border 0.2s ease-in-out;
+}
+
+.text-field:focus {
+  border-color: #007bff;
+  background-color: #eef4ff;
+}
+
+/* Icons */
+.icon {
+  display: inline-flex;
+  align-items: center;
+  margin-right: 6px;
+  color: #555;
+}
+.table-disclaimer {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background-color: #fff8e1; 
+  color: #856404;
+  font-weight: 500;
+  font-size: 14px;
+  padding: 12px 16px;
+  border-left: 4px solid #ffb300;
+  border-radius: 8px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+  max-width: 80%;
+  margin: 16px auto;
+  text-align: center;
+  justify-content: center;
+}
+
+.notice-icon {
+  color: #ff9800;
+  font-size: 20px;
+}

@@ -2,8 +2,8 @@ import React from "react";
 import "./App.css";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import { FunctionComponent } from "react";
-import { ThemeProvider } from "./providers/theme/ThemeContext";
-import { LanguageProvider } from "./providers/language/LanguageContext";
+import { ThemeProvider } from "./providers/theme/themeContext";
+import { LanguageProvider } from "./providers/language/languageContext";
 
 declare const require: {
   context: (

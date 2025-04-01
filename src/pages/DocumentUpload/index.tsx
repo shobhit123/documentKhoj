@@ -40,9 +40,9 @@ import {
   Article,
   KeyboardArrowRight
 } from "@mui/icons-material";
-import TagInput from "../../Document/component/TagInput";
-import UploadDocument from "../../Document/component/UploadDocument";
-import QAGenerator from "../../Document/component/QAGenerator";
+import TagInput from "../../helper/tagInput";
+import UploadDocument from "../../helper/uploadDocument";
+import QAGenerator from "../../helper/qaGenerator";
 import MenuIcon from "@mui/icons-material/Menu";
 import ChatIcon from "@mui/icons-material/Chat";
 import SettingsIcon from "@mui/icons-material/Settings";
@@ -51,8 +51,8 @@ import LanguageIcon from "@mui/icons-material/Language";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import { handleGenerateQA } from "src/pages/DocumentUpload/documentUploadService";
 import useDocumentUploadHook from "./useDocumentUploadHook";
-import ThemeToggleButton from "src/providers/theme/ThemeToggleButton";
-import LanguageToggleButton from "src/providers/language/LanguageToggleButton";
+import ThemeToggleButton from "src/providers/theme/themeToggleButton";
+import LanguageToggleButton from "src/providers/language/languageToggleButton";
 import Drawer from "../../components/organisms/Drawer";
 
 const DocumentUpload = () => {

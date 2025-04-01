@@ -74,3 +74,6 @@ export const handleGenerateQA = async (
     }, 2000);
   }
 };
+
+// service file name 
+// HOC for loading , API calls

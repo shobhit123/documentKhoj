@@ -1,0 +1,254 @@
+.ratings-container {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  padding: 32px;
+  /* max-width: 900px; */
+  max-width: 80vw;
+  margin: 0 auto;
+  background: #f5f7fa;
+  border-radius: 12px;
+}
+
+.rating-box {
+  width: 100%;
+  padding: 24px;
+  border-radius: 12px;
+  background-color: #ffffff;
+  box-shadow: 0px 2px 12px rgba(0, 0, 0, 0.08);
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  border: 1px solid #d1d5db; /* Softer border */
+  transition: transform 0.2s ease-in-out;
+}
+
+.rating-box:hover {
+  transform: translateY(-2px);
+}
+
+.field-container {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-bottom: 8px;
+}
+
+.field-label {
+  font-size: 14px;
+  font-weight: 600;
+  color: #333;
+}
+
+.info-field {
+  font-size: 14px;
+  background-color: #f9fafb;
+  border-radius: 8px;
+  height: 42px;
+  padding: 10px 14px;
+  border: 1px solid #d1d5db;
+  font-family: 'Inter', sans-serif;
+  transition: border 0.2s ease-in-out;
+}
+
+.info-field:focus {
+  border: 1px solid #0056b3;
+}
+
+.MuiInputBase-root.Mui-disabled {
+  color: rgba(0, 0, 0, 0.75);
+  font-weight: 500;
+  font-size: 14px;
+}
+
+.rating-group {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 16px 18px;
+  /* background: rgba(0, 76, 143, 0.15); */
+  backdrop-filter: blur(10px);
+  border-radius: 14px;
+  border: 1px solid rgba(0, 76, 143, 0.3);
+  box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.08);
+  transition: all 0.3s ease-in-out;
+}
+
+.rating-group:hover {
+  box-shadow: 0px 6px 12px rgba(0, 0, 0, 0.12);
+  transform: translateY(-2px);
+}
+
+.rating-group .MuiTypography-root {
+  font-size: 14px;
+  font-weight: 400;
+  /* color: #004C8F; */
+  min-width: 150px;
+  text-align: left;
+}
+
+.rating-group .MuiRating-root {
+  font-size: 26px;
+  transition: transform 0.2s ease-in-out;
+}
+
+.rating-group .MuiRating-iconFilled {
+  color: #004C8F;
+}
+
+.rating-group .MuiRating-iconHover {
+  color: #004C8F; 
+}
+
+.rating-group .MuiRating-root:hover {
+  transform: scale(1.08);
+}
+
+.rating-progress-container {
+  flex: 1;
+  height: 8px;
+  background: #dbe8f5;
+  border-radius: 8px;
+  overflow: hidden;
+  position: relative;
+}
+
+.rating-progress-bar {
+  height: 100%;
+  border-radius: 8px;
+  /* background: linear-gradient(90deg, #004C8F, #0070C0); */
+  background-color: #004C8F;
+  transition: width 0.4s ease-in-out;
+}
+
+
+
+
+
+.no-data {
+  text-align: center;
+  font-size: 16px;
+  color: #777;
+  font-weight: 500;
+}
+
+.pagination {
+  display: flex;
+  justify-content: center;
+  margin-top: 24px;
+}
+
+.submit-button {
+  display: block;
+  margin: 24px auto;
+  padding: 12px 28px;
+  font-size: 16px;
+  border-radius: 8px;
+  background-color: #0056b3;
+  color: white;
+  font-weight: bold;
+  transition: background 0.2s ease-in-out, transform 0.2s ease-in-out;
+}
+
+.submit-button:hover {
+  background-color: #004494;
+  transform: translateY(-1px);
+}
+
+.tags-container {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  justify-content: center; /* Centers tags horizontally */
+  align-items: center; /* Centers tags vertically if needed */
+}
+
+.tag {
+  background-color: #004C8F; /* Updated color */
+  color: white;
+  padding: 6px 12px;
+  border-radius: 6px;
+  font-size: 13px;
+  font-weight: 500;
+  font-family: 'Inter', sans-serif;
+}
+
+.full-page-loader {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+}
+
+.table-disclaimer {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background-color: #fff8e1; 
+  color: #856404;
+  font-weight: 500;
+  font-size: 14px;
+  padding: 12px 16px;
+  border-left: 4px solid #ffb300;
+  border-radius: 8px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+  max-width: 80%;
+  margin: 16px auto;
+  text-align: center;
+  justify-content: center;
+}
+
+.notice-icon {
+  color: #ff9800;
+  font-size: 20px;
+}
+
+/* Disabled fields styling */
+.MuiInputBase-root.Mui-disabled {
+  pointer-events: none;
+  cursor: default;
+  background-color: #f5f5f5; /* Light gray background */
+}
+
+/* Container inside the TextField for tags */
+.tags-container {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  padding: 4px 8px;
+  align-items: center;
+  width: 100%;
+  justify-content: flex-start;
+}
+
+/* Chip Styling */
+.tag {
+  background-color: #004c8f !important; /* Ensures background color is applied */
+  color: white !important;
+  font-weight: 500;
+  font-size: 12px;
+  border-radius: 16px;
+  height: 28px;
+  padding: 4px 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  box-shadow: 0px 2px 4px rgba(0, 0, 0, 0.1);
+  transition: transform 0.2s ease-in-out;
+}
+
+/* On hover, slightly enlarge the chip */
+.tag:hover {
+  transform: scale(1.05);
+}
+
+/* Placeholder text when no tags are available */
+.no-tags-text {
+  color: #757575;
+  font-size: 14px;
+}
+

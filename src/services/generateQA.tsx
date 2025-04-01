@@ -1,5 +1,5 @@
-import { apiRequest } from "../../src/Document/API";
-import { API_ENDPOINTS } from "../../src/API/apiEndpoints";
+import { apiRequest } from "src/api/apiRequest";
+import { API_ENDPOINTS } from "../api/apiEndpoints";
 
 export const generateQA = async (
   path: string,

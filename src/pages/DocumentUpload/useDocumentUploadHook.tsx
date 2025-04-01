@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { getStrings } from "src/Document/common/strings";
-import { useLanguage } from "src/providers/language/LanguageContext";
+import { getStrings } from "src/helper/strings";
+import { useLanguage } from "src/providers/language/languageContext";
 import { submitDocument } from "src/services/submitDocument";
 
 const useDocumentUploadHook = () => {

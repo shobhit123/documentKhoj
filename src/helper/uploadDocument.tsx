@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { Box, Button, CircularProgress, Typography } from "@mui/material";
 import CloudUploadIcon from "@mui/icons-material/CloudUpload";
 import InsertDriveFileIcon from "@mui/icons-material/InsertDriveFile";
-import { uploadFileService } from "../../services/uploadService";
+import { uploadFileService } from "../services/uploadService";
 import { Delete } from "@mui/icons-material";
 
 type UploadDocumentProps = {

@@ -30,14 +30,11 @@ import {
 } from "@mui/icons-material";
 import Markdown from "react-markdown";
 import { generateSessionId, isValidURL } from "../../helper";
-import { useNavigate } from "react-router-dom";
-import BackButton from "../../Document/component/BackButton";
 import SearchBar from "../../components/molecules/SearchBar/index";
 import { handleSearch, fetchBotResponse } from "./chatService";
 import useChatHook from "./useChatHook";
-import { useTheme } from '../../providers/theme/ThemeContext'
-import MenuIcon from "@mui/icons-material/Menu";
-import Drawer from "../../components/organisms/Drawer";
+import { useTheme } from '../../providers/theme/themeContext'
+import withLayout from "src/providers/hoc/withLayout";
 
 const ChatBotPage = () => {
   const {
@@ -62,8 +59,6 @@ const ChatBotPage = () => {
     chatLoading,
     chatInput,
     setChatInput,
-    drawerOpen,
-    toggleDrawer
   } = useChatHook();
 
   const { theme } = useTheme();
@@ -195,14 +190,6 @@ const ChatBotPage = () => {
 
   return (
     <>
-      <Drawer drawerOpen={drawerOpen} toggleDrawer={toggleDrawer}/>
-      <Box sx={{ display: "flex", padding:'12px 0px 0px 12px' }}>
-        <IconButton onClick={toggleDrawer(true)}>
-          <MenuIcon fontSize="large" color="primary" />
-        </IconButton>
-        <BackButton />
-      </Box>
-
       <Box sx={{ display: "flex", height: "100vh", overflow: "hidden" }}>
         {/* Left Side: Search Bar and Results */}
 
@@ -435,4 +422,4 @@ const ChatBotPage = () => {
   );
 };
 
-export default ChatBotPage;
+export default withLayout(ChatBotPage);
