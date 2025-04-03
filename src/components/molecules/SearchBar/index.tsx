@@ -26,8 +26,9 @@ const SearchBar: React.FC<SearchBarProps> = ({
       placeholder={placeholder}
       variant="outlined"
       value={value}
+      multiline
       onChange={onQueryChange}
-      sx={{ backgroundColor: "#fff", borderRadius: 1 }}
+      sx={{ backgroundColor: "#fff", borderRadius: 1, margin: '8px 0px' }}
       InputProps={{
         startAdornment: <SearchIcon sx={{ color: "#004a92", mr: 1 }} />,
         endAdornment: (

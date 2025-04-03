@@ -1,4 +1,4 @@
-import React, { useState, useRef, useContext } from "react";
+import React, { useState, useRef, useContext, useEffect } from "react";
 import {
   AppBar,
   Toolbar,
@@ -14,6 +14,10 @@ import {
   Snackbar,
   Alert,
   Link,
+  Stack,
+  ListItem,
+  ListItemIcon,
+  ListItemText,
 } from "@mui/material";
 import Button from "../../components/atoms/Button/index";
 // import TextField from "../../components/atoms/Textfield/index.tsx";
@@ -33,8 +37,11 @@ import { generateSessionId, isValidURL } from "../../helper";
 import SearchBar from "../../components/molecules/SearchBar/index";
 import { handleSearch, fetchBotResponse } from "./chatService";
 import useChatHook from "./useChatHook";
-import { useTheme } from '../../providers/theme/themeContext'
+import { useTheme } from "../../providers/theme/themeContext";
 import withLayout from "src/providers/hoc/withLayout";
+import AIChat from "./aiChat";
+import WarningAmberIcon from "@mui/icons-material/WarningAmber";
+import DescriptionIcon from "@mui/icons-material/Description";
 
 const ChatBotPage = () => {
   const {
@@ -59,9 +66,34 @@ const ChatBotPage = () => {
     chatLoading,
     chatInput,
     setChatInput,
+    setChatLoading,
   } = useChatHook();
 
   const { theme } = useTheme();
+  const verifiedStamp = require("../../assets/verified-icon.png");
+  const documents = ["Annexure I", "Annexure II"];
+  const messages = [
+    "Bot is typing...",
+    "Working on your request...",
+    "Getting ready...",
+  ];
+  const [currentMessage, setCurrentMessage] = useState("");
+
+  useEffect(() => {
+    if (chatLoading) {
+      setCurrentMessage(messages[0]); // Immediately set the first message
+
+      let index = 0;
+      const interval = setInterval(() => {
+        index = (index + 1) % messages.length;
+        setCurrentMessage(messages[index]);
+      }, 900);
+
+      return () => clearInterval(interval);
+    } else {
+      setCurrentMessage("");
+    }
+  }, [chatLoading]);
 
   // Render search results
   const renderSearchResults = () => {
@@ -69,38 +101,81 @@ const ChatBotPage = () => {
     const textPreview = textResult?.content?.slice(0, 400);
 
     return (
-      <Box>
+      <Box sx={{ textAlign: "left" }}>
         {/* Text Response */}
         {textResult && (
           <Paper sx={{ p: 3, mb: 3, backgroundColor: "#f5f5f5" }}>
             <Typography variant="h6" sx={{ color: "#004a92", mb: 2 }}>
               {textResult.title}
             </Typography>
-            <Typography variant="body1" sx={{ textAlign: "left" }}>
+            <Typography
+              variant="body1"
+              sx={{ textAlign: "left", fontSize: "14px" }}
+            >
               <Markdown>
                 {showFullText ? textResult.content : `${textPreview}`}
               </Markdown>
             </Typography>
-            {textResult?.content?.length > 400 && (
-              <Button
-                onClick={() => setShowFullText(!showFullText)}
-                label={showFullText ? "Show Less" : "Show More"}
-              />
-            )}
+
+            <Box
+              sx={{
+                display: "flex",
+                justifyContent: "space-between",
+                alignItems: "center",
+                position: "relative",
+              }}
+            >
+              {/* Button on the left */}
+              {textResult?.content?.length > 400 && (
+                <Button
+                  onClick={() => setShowFullText(!showFullText)}
+                  label={showFullText ? "Show Less" : "Show More"}
+                />
+              )}
+
+              {/* Verified box on the right */}
+              <Box
+                sx={{
+                  display: "flex",
+                  alignItems: "center",
+                  // px: 1.5,
+                  // py: 0.5,
+                  // borderRadius: 2,
+                  // boxShadow: 1,
+                }}
+              >
+                <img
+                  src={verifiedStamp}
+                  alt="Verified Stamp"
+                  width={50}
+                  height={50}
+                  style={{ objectFit: "contain" }}
+                />
+              </Box>
+            </Box>
 
             {/** Show the disclaimer always irespective of the length of result */}
             <Box
               sx={{
                 mt: 2,
                 p: 2,
-                backgroundColor: "#f9f9f9",
+                backgroundColor: "#fff8e1", // Soft yellow tone
                 borderRadius: 2,
+                display: "flex",
+                alignItems: "center",
+                boxShadow: 1,
               }}
             >
-              <Typography variant="body2" color="textSecondary">
-                ⚠️ <b>Disclaimer:</b> This is an AI-generated response, which
-                might be incorrect or incomplete at times. For a detailed and
-                complete response, please refer to the references below.
+              <WarningAmberIcon
+                sx={{ color: "#ffa726", fontSize: 20, mr: 1 }}
+              />
+              <Typography
+                variant="body2"
+                sx={{ color: "text.secondary", fontWeight: 500, fontSize: 12 }}
+              >
+                <b>Disclaimer:</b> This is an AI-generated response and may
+                contain inaccuracies. For complete and detailed information,
+                refer to the sources below.
               </Typography>
             </Box>
 
@@ -112,25 +187,38 @@ const ChatBotPage = () => {
                 </Typography>
                 {Array.isArray(textResult.metadata) &&
                   textResult.metadata.map((meta, index) => (
-                    <Card key={index} sx={{ mb: 2, p: 2 , backgroundColor: styles.backgroundColor, color: styles.textColor}}>
+                    <Card
+                      key={index}
+                      sx={{
+                        mb: 2,
+                        p: 2,
+                        backgroundColor: styles.backgroundColor,
+                        color: styles.textColor,
+                        textAlign: "left",
+                      }}
+                    >
                       <Typography variant="body2">
                         <strong>Page No:</strong> {meta.page_no}
                       </Typography>
-                      <Typography variant="body2" sx={{mt: 1}}>
+                      <Typography variant="body2" sx={{ mt: 1 }}>
                         <strong>Topic:</strong> {meta.topic || "N/A"}
                       </Typography>
-                      <Typography variant="body2" sx={{mt: 1}}>
+                      <Typography variant="body2" sx={{ mt: 1 }}>
                         <strong>Sub Topic:</strong> {meta.sub_topic || "N/A"}
                       </Typography>
-                      <Typography variant="body2" sx={{mt: 1}}>
+                      <Typography variant="body2" sx={{ mt: 1 }}>
                         <strong>Section:</strong> {meta.section}
                       </Typography>
-                      <Typography variant="body2" sx={{ mb: 2, mt:1 }}>
+                      {/* <Typography variant="body2" sx={{ mb: 2, mt: 1 }}>
                         <strong>Tags:</strong>{" "}
                         {meta?.tags?.map((tag: string, idx: number) => (
-                          <Chip key={idx} label={tag} sx={{ mr: 1, background: styles.chipBg}} />
+                          <Chip
+                            key={idx}
+                            label={tag}
+                            sx={{ mr: 1, background: styles.chipBg }}
+                          />
                         ))}
-                      </Typography>
+                      </Typography> */}
                       {meta.deep_links && meta.deep_links.length > 0 && (
                         <Box sx={{ mt: 1 }}>
                           <Typography variant="body2">
@@ -156,22 +244,53 @@ const ChatBotPage = () => {
                         </Box>
                       )}
                       {isValidURL(meta.doc_url) && (
-                        <Typography variant="body2">
-                          {STRINGS.source}:{" "}
-                          <strong>
-                            {meta.doc_url
-                              ?.replace(
-                                "gs://ai-utilities-storage/chunk_job",
-                                ""
-                              )
-                              .replace(/\//g, " → ")}
-                          </strong>
+                        <Typography variant="body2" sx={{ mt: 1 }}>
+                          <strong> {STRINGS.source}: </strong>
+                          <Link
+                            href={meta.source}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            sx={{ color: "#004A92"}}
+                          >
+                            {meta.source}
+                          </Link>
                         </Typography>
                       )}
                     </Card>
                   ))}
               </Box>
             )}
+
+            {/* <Box sx={{ mt: 2 }}>
+              <Typography variant="h6" sx={{ color: "#004a92", mb: 1 }}>
+                {STRINGS.documents}
+              </Typography>
+              <Card
+                sx={{
+                  mb: 2,
+                  p: 2,
+                  backgroundColor: styles.backgroundColor,
+                  color: styles.textColor,
+                  textAlign: "left",
+                }}
+              >
+                <Stack spacing={1.5}>
+                  {documents.map((doc, index) => (
+                    <Card>
+                      <ListItem key={index} sx={{ px: 0 }}>
+                        <ListItemIcon sx={{ minWidth: 32, paddingLeft: 2 }}>
+                          <DescriptionIcon sx={{ color: "#004a92" }} />
+                        </ListItemIcon>
+                        <ListItemText
+                          primary={doc}
+                          sx={{ fontWeight: 500, fontSize: "0.875rem" }}
+                        />
+                      </ListItem>
+                    </Card>
+                  ))}
+                </Stack>
+              </Card>
+            </Box> */}
           </Paper>
         )}
       </Box>
@@ -185,7 +304,7 @@ const ChatBotPage = () => {
     messageBg: theme === "light" ? "#e0e0e0" : "#333333",
     userMessageBg: theme === "light" ? "#004a92" : "#00bcd4",
     userMessageColor: theme === "light" ? "white" : "black",
-    chipBg: theme === 'light' ? 'rgba(0, 0, 0, 0.08)' : 'white'
+    chipBg: theme === "light" ? "rgba(0, 0, 0, 0.08)" : "white",
   };
 
   return (
@@ -215,7 +334,8 @@ const ChatBotPage = () => {
                     setChatMessages,
                     setSearchResults,
                     setLoading,
-                    setError
+                    setError,
+                    setIsChatOpen
                   )
                 }
                 onQueryChange={(e) => setSearchQuery(e.target.value)}
@@ -227,8 +347,52 @@ const ChatBotPage = () => {
           <Box sx={{ mt: 3 }}>
             {/* Loading State */}
             {loading && (
-              <Box sx={{ display: "flex", justifyContent: "center", mt: 4 }}>
-                <CircularProgress />
+              <Box
+                sx={{
+                  display: "flex",
+                  flexDirection: "column",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  height: "50vh", // Center vertically
+                }}
+              >
+                {/* Typing Indicator (Pulsing Dots) */}
+                <Box sx={{ display: "flex", gap: "6px" }}>
+                  {[...Array(5)].map((_, i) => (
+                    <Box
+                      key={i}
+                      sx={{
+                        width: "6px",
+                        height: "20px",
+                        borderRadius: "4px",
+                        background: "linear-gradient(180deg, #888, #444)",
+                        animation: "wave 1.5s infinite ease-in-out",
+                        animationDelay: `${i * 0.2}s`,
+                        "@keyframes wave": {
+                          "0%": { transform: "scaleY(1)" },
+                          "50%": {
+                            transform: "scaleY(1.8)",
+                            background: "#888",
+                          },
+                          "100%": { transform: "scaleY(1)" },
+                        },
+                      }}
+                    />
+                  ))}
+                </Box>
+
+                {/* Animated "Generating response..." */}
+                <Box
+                  sx={{
+                    mt: 2,
+                    fontSize: "16px", // Slightly larger text
+                    fontWeight: "bold",
+                    color: "gray",
+                    letterSpacing: "0.5px",
+                  }}
+                >
+                  Generating response...
+                </Box>
               </Box>
             )}
 
@@ -292,6 +456,20 @@ const ChatBotPage = () => {
         {isChatOpen && (
           <Box
             sx={{ flex: 1, p: 3, backgroundColor: "#f5f5f5", overflow: "auto" }}
+            // sx={{
+            //   position: "fixed",
+            //   bottom: "20px",
+            //   right: "20px",
+            //   width: "400px",
+            //   height: "500px",
+            //   backgroundColor: "#fff",
+            //   borderRadius: "12px",
+            //   boxShadow: "0px 4px 10px rgba(0, 0, 0, 0.2)",
+            //   display: "flex",
+            //   flexDirection: "column",
+            //   overflow: "hidden",
+            //   padding:'14px'
+            // }}
           >
             <Box
               sx={{
@@ -317,70 +495,11 @@ const ChatBotPage = () => {
               }}
             ></Box>
             <Box sx={{ height: "70vh", overflow: "auto", mb: 2 }}>
-              {chatMessages?.map((msg, index) => (
-                <>
-                  <Box
-                    key={index}
-                    sx={{
-                      display: "flex",
-                      justifyContent: msg.isUser ? "flex-end" : "flex-start",
-                      mb: 2,
-                    }}
-                  >
-                    <Box sx={{ display: "flex", alignItems: "center" }}>
-                      {!msg?.isUser && <BotIcon sx={{ mr: 1 }} />}
-                      <Paper
-                        sx={{
-                          p: 2,
-                          backgroundColor: msg.isUser ? "#004a92" : "#e0e0e0",
-                          color: msg.isUser ? "white" : "black",
-                          borderRadius: 2,
-                        }}
-                      >
-                        <Markdown>{msg?.text}</Markdown>
-                      </Paper>
-                      {msg?.isUser && <UserIcon sx={{ mr: 1 }} />}
-                    </Box>
-                  </Box>
-
-                  {/** Block to show the chatbot source */}
-                  {!msg?.isUser && (
-                    <Box sx={{ pl: 2 }}>
-                      {" "}
-                      <Typography
-                        variant="body2"
-                        color="text.secondary"
-                        component="span"
-                      >
-                        {STRINGS.source}:{" "}
-                      </Typography>
-                      <Typography
-                        variant="body2"
-                        color="text.primary"
-                        component="span"
-                        sx={{
-                          ml: 1,
-                          textDecoration:
-                            msg?.source && msg?.source?.length > 1
-                              ? "underline"
-                              : "none",
-                        }}
-                      >
-                        {msg?.source}
-                      </Typography>
-                    </Box>
-                  )}
-                </>
-              ))}
+              <AIChat setChatLoading={setChatLoading} />
             </Box>
             {chatLoading && (
-              <Box
-                sx={{
-                  display: "flex",
-                  justifyContent: "flex-start",
-                }}
-              >
-                <Typography>Bot is typing...</Typography>
+              <Box sx={{ display: "flex", justifyContent: "flex-start" }}>
+                <Typography>{currentMessage}</Typography>
               </Box>
             )}
             <Box sx={{ display: "flex", alignItems: "center" }}>
@@ -406,6 +525,16 @@ const ChatBotPage = () => {
             </Box>
           </Box>
         )}
+
+        {/** New chat window integration */}
+        {/* <ChatWithBot
+          isChatOpen={isChatOpen}
+          setIsChatOpen={setIsChatOpen}
+          chatMessages={chatMessages}
+          chatInput={chatInput}
+          setChatInput={setChatInput}
+          handleChatSend={handleChatSend}
+          /> */}
 
         {/* Error Snackbar */}
         <Snackbar

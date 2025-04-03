@@ -72,6 +72,7 @@ const locales: Record<'en' | 'hi', { [key: string]: string }> = {
     // referencesLabel: "Add Reference",
     add: "Add",
     search: "Search",
+    chatWithBot: "Chat with Bot",
     somethingWentWrong:
       "Something went wrong! \nPlease reUpload the file again.",
       chatWithUs: 'Chat with us...',
@@ -79,7 +80,8 @@ const locales: Record<'en' | 'hi', { [key: string]: string }> = {
       "Something went wrong",
       filePath: "File Path",
       source:"Source",
-      references: 'References'
+      references: 'References',
+      documents: 'Documents'
   },
   hi: {
     title: "प्रश्न-उत्तर जनरेटर",
@@ -158,7 +160,9 @@ const locales: Record<'en' | 'hi', { [key: string]: string }> = {
     chatWithUs: 'Chat with us...',
     source: 'स्रोत',
     references: 'संदर्भ',
-    search: 'खोज'
+    search: 'खोज',
+    chatWithBot: "बॉट के साथ चैट करें",
+    documents: 'दस्तावेज़'
   }
 };
 

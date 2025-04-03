@@ -4,8 +4,12 @@ import MenuIcon from "@mui/icons-material/Menu";
 import Drawer from "../../components/organisms/Drawer";
 import BackButton from "../../components/molecules/BackButton";
 
-const withLayout = <P extends object>(WrappedComponent: React.ComponentType<P>) => {
-  const HOC: React.FC<P> = (props) => {
+type WithLayoutProps = {
+  hideBackButton?: boolean; // Marking it optional
+};
+
+const withLayout = <P extends object>(WrappedComponent: React.ComponentType<P & WithLayoutProps>) => {
+  const HOC: React.FC<P & WithLayoutProps> = (props) => {
     const [drawerOpen, setDrawerOpen] = useState(false);
 
     const toggleDrawer = (open: boolean) => () => {
@@ -19,7 +23,7 @@ const withLayout = <P extends object>(WrappedComponent: React.ComponentType<P>) 
           <IconButton onClick={toggleDrawer(true)}>
             <MenuIcon fontSize="large" color="primary" />
           </IconButton>
-          <BackButton />
+          {props.hideBackButton && <BackButton />} 
         </Box>
         <WrappedComponent {...props} />
       </>

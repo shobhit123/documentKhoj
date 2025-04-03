@@ -83,6 +83,7 @@ const useChatHook = () => {
         chatLoading,
         chatInput,
         setChatInput,
+        setChatLoading
     }
 };
 

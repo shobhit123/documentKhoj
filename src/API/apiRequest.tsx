@@ -1,4 +1,4 @@
-import api from "./index"; // Import pre-configured Axios instance
+import api from "./index";
 // import { BASE_URL } from "../helper/constants";
 
 export const apiRequest = async (
