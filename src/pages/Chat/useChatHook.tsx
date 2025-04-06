@@ -30,6 +30,8 @@ const useChatHook = () => {
     const [loading, setLoading] = useState(false); // Loading state
     const [error, setError] = useState<ChatError>(null); // Error state
     const [chatLoading, setChatLoading] = useState(false); // Loading state for chatbot
+
+    const [triggerQuery, setTriggerQuery] = useState<string | null>(null);
     // const STRINGS = getStrings("en"); //ToDo: Will map this in future with actual locale
     const { language} = useLanguage()
 
@@ -37,18 +39,25 @@ const useChatHook = () => {
     const sessionId = useRef(generateSessionId()).current;
 
     // Handle chat send
-  const handleChatSend = async () => {
-    if (!chatInput.trim()) return;
-    setChatLoading(true);
-    const userMessage = { text: chatInput, isUser: true };
-    setChatMessages([...chatMessages, userMessage]);
-    setChatInput("");
-    const { botResponse, source } = await fetchBotResponse(chatInput, sessionId);
-    setChatMessages((prev) => [
-      ...prev,
-      { text: botResponse, isUser: false, source },
-    ]);
-    setChatLoading(false);
+  // const handleChatSend = async () => {
+  //   if (!chatInput.trim()) return;
+  //   setChatLoading(true);
+  //   const userMessage = { text: chatInput, isUser: true };
+  //   setChatMessages([...chatMessages, userMessage]);
+  //   setChatInput("");
+  //   const { botResponse, source } = await fetchBotResponse(chatInput, sessionId);
+  //   setChatMessages((prev) => [
+  //     ...prev,
+  //     { text: botResponse, isUser: false, source },
+  //   ]);
+  //   setChatLoading(false);
+  // };
+
+  const handleChatSend = () => {
+    if (chatInput.trim()) {
+      setTriggerQuery(chatInput.trim());
+      setChatInput("");
+    }
   };
 
   // Reset search and chat
@@ -83,7 +92,9 @@ const useChatHook = () => {
         chatLoading,
         chatInput,
         setChatInput,
-        setChatLoading
+        setChatLoading,
+
+        triggerQuery
     }
 };
 

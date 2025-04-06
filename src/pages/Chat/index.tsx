@@ -42,6 +42,7 @@ import withLayout from "src/providers/hoc/withLayout";
 import AIChat from "./aiChat";
 import WarningAmberIcon from "@mui/icons-material/WarningAmber";
 import DescriptionIcon from "@mui/icons-material/Description";
+import AccuracyDisclaimer from "./accurancyDisclaimer";
 
 const ChatBotPage = () => {
   const {
@@ -67,6 +68,7 @@ const ChatBotPage = () => {
     chatInput,
     setChatInput,
     setChatLoading,
+    triggerQuery
   } = useChatHook();
 
   const { theme } = useTheme();
@@ -96,7 +98,7 @@ const ChatBotPage = () => {
   }, [chatLoading]);
 
   // Render search results
-  const renderSearchResults = () => {
+   const renderSearchResults = () => {
     const textResult = searchResults.find((result) => result.type === "text");
     const textPreview = textResult?.content?.slice(0, 400);
 
@@ -134,7 +136,7 @@ const ChatBotPage = () => {
               )}
 
               {/* Verified box on the right */}
-              <Box
+              {/* <Box
                 sx={{
                   display: "flex",
                   alignItems: "center",
@@ -151,11 +153,12 @@ const ChatBotPage = () => {
                   height={50}
                   style={{ objectFit: "contain" }}
                 />
-              </Box>
+              </Box> */}
             </Box>
 
             {/** Show the disclaimer always irespective of the length of result */}
-            <Box
+            <AccuracyDisclaimer/>
+            {/* <Box
               sx={{
                 mt: 2,
                 p: 2,
@@ -177,7 +180,7 @@ const ChatBotPage = () => {
                 contain inaccuracies. For complete and detailed information,
                 refer to the sources below.
               </Typography>
-            </Box>
+            </Box> */}
 
             {/* Metadata */}
             {textResult.metadata && (
@@ -315,7 +318,7 @@ const ChatBotPage = () => {
         <Box
           sx={{
             flex: 1,
-            p: 3,
+            padding: '0px 24px',
             overflow: "auto",
             backgroundColor: styles.backgroundColor,
           }}
@@ -455,7 +458,7 @@ const ChatBotPage = () => {
         {/* Right Side: Chat Window */}
         {isChatOpen && (
           <Box
-            sx={{ flex: 1, p: 3, backgroundColor: "#f5f5f5", overflow: "auto" }}
+            sx={{ flex: 1, p: 3, backgroundColor: "#f5f5f5", overflow: "auto",height: 'fit-content', marginRight:'24px' }}
             // sx={{
             //   position: "fixed",
             //   bottom: "20px",
@@ -495,7 +498,7 @@ const ChatBotPage = () => {
               }}
             ></Box>
             <Box sx={{ height: "70vh", overflow: "auto", mb: 2 }}>
-              <AIChat setChatLoading={setChatLoading} />
+              <AIChat setChatLoading={setChatLoading} triggerQuery={triggerQuery}/>
             </Box>
             {chatLoading && (
               <Box sx={{ display: "flex", justifyContent: "flex-start" }}>
