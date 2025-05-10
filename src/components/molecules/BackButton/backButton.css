@@ -1,0 +1,51 @@
+/* Back Button Container */
+.back-button {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 6px 12px;
+    cursor: pointer;
+    transition: color 0.2s ease-in-out;
+  }
+  
+  /* Arrow Icon inside a Circle with Background */
+  .back-icon-container {
+    width: 36px;
+    height: 36px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    background: #1976d2; /* Banking app blue */
+    transition: background 0.2s ease-in-out;
+  }
+  
+  /* Icon Styling */
+  .back-icon {
+    color: white;
+    font-size: 20px;
+  }
+  
+  /* Text Styling */
+  .back-text {
+    font-weight: 500;
+    font-size: 14px;
+    color: #333;
+  }
+
+  .back-text-dark{
+    color: white;
+    font-weight: 500;
+    font-size: 14px;
+  }
+  
+  /* Hover Effect */
+  .back-button:hover .back-icon-container {
+    background: #135ba1; /* Darker blue on hover */
+  }
+  
+  /* Active Click Effect */
+  .back-button:active .back-icon-container {
+    background: #0e4983; /* Even darker blue on click */
+  }
+  

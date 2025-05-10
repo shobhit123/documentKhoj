@@ -1,0 +1,557 @@
+import React, { useState, useRef, useContext, useEffect } from "react";
+import {
+  AppBar,
+  Toolbar,
+  TextField,
+  IconButton,
+  Paper,
+  Typography,
+  // Button,
+  Box,
+  Card,
+  Chip,
+  CircularProgress,
+  Snackbar,
+  Alert,
+  Link,
+  Stack,
+  ListItem,
+  ListItemIcon,
+  ListItemText,
+} from "@mui/material";
+import Button from "../../components/atoms/Button/index";
+// import TextField from "../../components/atoms/Textfield/index.tsx";
+import {
+  Search as SearchIcon,
+  Send as SendIcon,
+  ArrowBack as ArrowBackIcon,
+  Mic as MicIcon,
+  Chat as ChatIcon,
+  SmartToy as BotIcon,
+  AccountCircle as UserIcon,
+  Close as CloseIcon,
+  Refresh as RefreshIcon,
+} from "@mui/icons-material";
+import Markdown from "react-markdown";
+import { generateSessionId, isValidURL } from "../../helper";
+import SearchBar from "../../components/molecules/SearchBar/index";
+import { handleSearch, fetchBotResponse } from "./chatService";
+import useChatHook from "./useChatHook";
+import { useTheme } from "../../providers/theme/themeContext";
+import withLayout from "src/providers/hoc/withLayout";
+import AIChat from "./aiChat";
+import WarningAmberIcon from "@mui/icons-material/WarningAmber";
+import DescriptionIcon from "@mui/icons-material/Description";
+import AccuracyDisclaimer from "./accurancyDisclaimer";
+
+const ChatBotPage = () => {
+  const {
+    handleChatSend,
+    resetSearch,
+    searchResults,
+    showFullText,
+    setShowFullText,
+    STRINGS,
+    searchQuery,
+    sessionId,
+    setChatMessages,
+    setSearchResults,
+    setLoading,
+    setError,
+    setSearchQuery,
+    loading,
+    error,
+    isChatOpen,
+    setIsChatOpen,
+    chatMessages,
+    chatLoading,
+    chatInput,
+    setChatInput,
+    setChatLoading,
+    triggerQuery
+  } = useChatHook();
+
+  const { theme } = useTheme();
+  const verifiedStamp = require("../../assets/verified-icon.png");
+  const documents = ["Annexure I", "Annexure II"];
+  const messages = [
+    "Bot is typing...",
+    "Working on your request...",
+    "Getting ready...",
+  ];
+  const [currentMessage, setCurrentMessage] = useState("");
+
+  useEffect(() => {
+    if (chatLoading) {
+      setCurrentMessage(messages[0]); // Immediately set the first message
+
+      let index = 0;
+      const interval = setInterval(() => {
+        index = (index + 1) % messages.length;
+        setCurrentMessage(messages[index]);
+      }, 900);
+
+      return () => clearInterval(interval);
+    } else {
+      setCurrentMessage("");
+    }
+  }, [chatLoading]);
+
+  // Render search results
+   const renderSearchResults = () => {
+    const textResult = searchResults.find((result) => result.type === "text");
+    const textPreview = textResult?.content?.slice(0, 400);
+
+    return (
+      <Box sx={{ textAlign: "left" }}>
+        {/* Text Response */}
+        {textResult && (
+          <Paper sx={{ p: 3, mb: 3, backgroundColor: "#f5f5f5" }}>
+            <Typography variant="h6" sx={{ color: "#004a92", mb: 2 }}>
+              {textResult.title}
+            </Typography>
+            <Typography
+              variant="body1"
+              sx={{ textAlign: "left", fontSize: "14px" }}
+            >
+              <Markdown>
+                {showFullText ? textResult.content : `${textPreview}`}
+              </Markdown>
+            </Typography>
+
+            <Box
+              sx={{
+                display: "flex",
+                justifyContent: "space-between",
+                alignItems: "center",
+                position: "relative",
+              }}
+            >
+              {/* Button on the left */}
+              {textResult?.content?.length > 400 && (
+                <Button
+                  onClick={() => setShowFullText(!showFullText)}
+                  label={showFullText ? "Show Less" : "Show More"}
+                />
+              )}
+
+              {/* Verified box on the right */}
+              {/* <Box
+                sx={{
+                  display: "flex",
+                  alignItems: "center",
+                  // px: 1.5,
+                  // py: 0.5,
+                  // borderRadius: 2,
+                  // boxShadow: 1,
+                }}
+              >
+                <img
+                  src={verifiedStamp}
+                  alt="Verified Stamp"
+                  width={50}
+                  height={50}
+                  style={{ objectFit: "contain" }}
+                />
+              </Box> */}
+            </Box>
+
+            {/** Show the disclaimer always irespective of the length of result */}
+            <AccuracyDisclaimer/>
+            {/* <Box
+              sx={{
+                mt: 2,
+                p: 2,
+                backgroundColor: "#fff8e1", // Soft yellow tone
+                borderRadius: 2,
+                display: "flex",
+                alignItems: "center",
+                boxShadow: 1,
+              }}
+            >
+              <WarningAmberIcon
+                sx={{ color: "#ffa726", fontSize: 20, mr: 1 }}
+              />
+              <Typography
+                variant="body2"
+                sx={{ color: "text.secondary", fontWeight: 500, fontSize: 12 }}
+              >
+                <b>Disclaimer:</b> This is an AI-generated response and may
+                contain inaccuracies. For complete and detailed information,
+                refer to the sources below.
+              </Typography>
+            </Box> */}
+
+            {/* Metadata */}
+            {textResult.metadata && (
+              <Box sx={{ mt: 2 }}>
+                <Typography variant="h6" sx={{ color: "#004a92", mb: 1 }}>
+                  {STRINGS.references}
+                </Typography>
+                {Array.isArray(textResult.metadata) &&
+                  textResult.metadata.map((meta, index) => (
+                    <Card
+                      key={index}
+                      sx={{
+                        mb: 2,
+                        p: 2,
+                        backgroundColor: styles.backgroundColor,
+                        color: styles.textColor,
+                        textAlign: "left",
+                      }}
+                    >
+                      <Typography variant="body2">
+                        <strong>Page No:</strong> {meta.page_no}
+                      </Typography>
+                      <Typography variant="body2" sx={{ mt: 1 }}>
+                        <strong>Topic:</strong> {meta.topic || "N/A"}
+                      </Typography>
+                      <Typography variant="body2" sx={{ mt: 1 }}>
+                        <strong>Sub Topic:</strong> {meta.sub_topic || "N/A"}
+                      </Typography>
+                      <Typography variant="body2" sx={{ mt: 1 }}>
+                        <strong>Section:</strong> {meta.section}
+                      </Typography>
+                      {/* <Typography variant="body2" sx={{ mb: 2, mt: 1 }}>
+                        <strong>Tags:</strong>{" "}
+                        {meta?.tags?.map((tag: string, idx: number) => (
+                          <Chip
+                            key={idx}
+                            label={tag}
+                            sx={{ mr: 1, background: styles.chipBg }}
+                          />
+                        ))}
+                      </Typography> */}
+                      {meta.deep_links && meta.deep_links.length > 0 && (
+                        <Box sx={{ mt: 1 }}>
+                          <Typography variant="body2">
+                            <strong>Links:</strong>
+                          </Typography>
+                          {meta.deep_links.map((link: string, idx: number) =>
+                            isValidURL(link) ? (
+                              <Link
+                                key={idx}
+                                href={link}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                sx={{ display: "block", mt: 1 }}
+                              >
+                                {link}
+                              </Link>
+                            ) : (
+                              <Typography key={idx} variant="body2">
+                                {link}
+                              </Typography>
+                            )
+                          )}
+                        </Box>
+                      )}
+                      {isValidURL(meta.doc_url) && (
+                        <Typography variant="body2" sx={{ mt: 1 }}>
+                          <strong> {STRINGS.source}: </strong>
+                          <Link
+                            href={meta.source}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            sx={{ color: "#004A92"}}
+                          >
+                            {meta.source}
+                          </Link>
+                        </Typography>
+                      )}
+                    </Card>
+                  ))}
+              </Box>
+            )}
+
+            {/* <Box sx={{ mt: 2 }}>
+              <Typography variant="h6" sx={{ color: "#004a92", mb: 1 }}>
+                {STRINGS.documents}
+              </Typography>
+              <Card
+                sx={{
+                  mb: 2,
+                  p: 2,
+                  backgroundColor: styles.backgroundColor,
+                  color: styles.textColor,
+                  textAlign: "left",
+                }}
+              >
+                <Stack spacing={1.5}>
+                  {documents.map((doc, index) => (
+                    <Card>
+                      <ListItem key={index} sx={{ px: 0 }}>
+                        <ListItemIcon sx={{ minWidth: 32, paddingLeft: 2 }}>
+                          <DescriptionIcon sx={{ color: "#004a92" }} />
+                        </ListItemIcon>
+                        <ListItemText
+                          primary={doc}
+                          sx={{ fontWeight: 500, fontSize: "0.875rem" }}
+                        />
+                      </ListItem>
+                    </Card>
+                  ))}
+                </Stack>
+              </Card>
+            </Box> */}
+          </Paper>
+        )}
+      </Box>
+    );
+  };
+
+  const styles = {
+    backgroundColor: theme === "light" ? "#ffffff" : "#121212",
+    textColor: theme === "light" ? "#004a92" : "white",
+    chatBackground: theme === "light" ? "#f5f5f5" : "#1e1e1e",
+    messageBg: theme === "light" ? "#e0e0e0" : "#333333",
+    userMessageBg: theme === "light" ? "#004a92" : "#00bcd4",
+    userMessageColor: theme === "light" ? "white" : "black",
+    chipBg: theme === "light" ? "rgba(0, 0, 0, 0.08)" : "white",
+  };
+
+  return (
+    <>
+      <Box sx={{ display: "flex", height: "100vh", overflow: "hidden" }}>
+        {/* Left Side: Search Bar and Results */}
+
+        <Box
+          sx={{
+            flex: 1,
+            padding: '0px 24px',
+            overflow: "auto",
+            backgroundColor: styles.backgroundColor,
+          }}
+        >
+          <AppBar
+            position="static"
+            elevation={0}
+            sx={{ backgroundColor: "#004a92" }}
+          >
+            <Toolbar>
+              <SearchBar
+                onClick={() =>
+                  handleSearch(
+                    searchQuery,
+                    sessionId,
+                    setChatMessages,
+                    setSearchResults,
+                    setLoading,
+                    setError,
+                    setIsChatOpen
+                  )
+                }
+                onQueryChange={(e) => setSearchQuery(e.target.value)}
+                value={searchQuery}
+                string={STRINGS}
+              />
+            </Toolbar>
+          </AppBar>
+          <Box sx={{ mt: 3 }}>
+            {/* Loading State */}
+            {loading && (
+              <Box
+                sx={{
+                  display: "flex",
+                  flexDirection: "column",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  height: "50vh", // Center vertically
+                }}
+              >
+                {/* Typing Indicator (Pulsing Dots) */}
+                <Box sx={{ display: "flex", gap: "6px" }}>
+                  {[...Array(5)].map((_, i) => (
+                    <Box
+                      key={i}
+                      sx={{
+                        width: "6px",
+                        height: "20px",
+                        borderRadius: "4px",
+                        background: "linear-gradient(180deg, #888, #444)",
+                        animation: "wave 1.5s infinite ease-in-out",
+                        animationDelay: `${i * 0.2}s`,
+                        "@keyframes wave": {
+                          "0%": { transform: "scaleY(1)" },
+                          "50%": {
+                            transform: "scaleY(1.8)",
+                            background: "#888",
+                          },
+                          "100%": { transform: "scaleY(1)" },
+                        },
+                      }}
+                    />
+                  ))}
+                </Box>
+
+                {/* Animated "Generating response..." */}
+                <Box
+                  sx={{
+                    mt: 2,
+                    fontSize: "16px", // Slightly larger text
+                    fontWeight: "bold",
+                    color: "gray",
+                    letterSpacing: "0.5px",
+                  }}
+                >
+                  Generating response...
+                </Box>
+              </Box>
+            )}
+
+            {/* Empty/Error/Initial State */}
+            {!loading && searchResults.length === 0 && (
+              <Typography
+                variant="h6"
+                sx={{ color: styles.textColor, textAlign: "center", mt: 4 }}
+              >
+                {error ? (
+                  error
+                ) : (
+                  <>
+                    Enter your query above and click{" "}
+                    <span style={{ fontWeight: "bold" }}>{STRINGS.search}</span>
+                  </>
+                )}
+              </Typography>
+            )}
+
+            {/* Search Results */}
+            {!loading && searchResults.length > 0 && renderSearchResults()}
+
+            {/* Reset Button */}
+            {searchResults.length > 0 && (
+              <Button
+                variant="contained"
+                style={{
+                  backgroundColor: "#ff0000",
+                  color: "#fff",
+                  position: "fixed",
+                  bottom: 20,
+                  left: 20,
+                }}
+                startIcon={<RefreshIcon />}
+                onClick={resetSearch}
+                label="Reset"
+              />
+            )}
+
+            {/* Chat Button */}
+            {searchResults.length > 0 && !isChatOpen && (
+              <Button
+                variant="contained"
+                style={{
+                  backgroundColor: "#004a92",
+                  color: "#fff",
+                  position: "fixed",
+                  bottom: 20,
+                  right: 20,
+                }}
+                startIcon={<ChatIcon />}
+                onClick={() => setIsChatOpen(true)}
+                label="Chat with Bot"
+              />
+            )}
+          </Box>
+        </Box>
+
+        {/* Right Side: Chat Window */}
+        {isChatOpen && (
+          <Box
+            sx={{ flex: 1, p: 3, backgroundColor: "#f5f5f5", overflow: "auto",height: 'fit-content', marginRight:'24px' }}
+            // sx={{
+            //   position: "fixed",
+            //   bottom: "20px",
+            //   right: "20px",
+            //   width: "400px",
+            //   height: "500px",
+            //   backgroundColor: "#fff",
+            //   borderRadius: "12px",
+            //   boxShadow: "0px 4px 10px rgba(0, 0, 0, 0.2)",
+            //   display: "flex",
+            //   flexDirection: "column",
+            //   overflow: "hidden",
+            //   padding:'14px'
+            // }}
+          >
+            <Box
+              sx={{
+                display: "flex",
+                justifyContent: "space-between",
+                alignItems: "center",
+                mb: 2,
+              }}
+            >
+              <Typography variant="h6" sx={{ color: "#004a92" }}>
+                Chat with Bot
+              </Typography>
+              <IconButton onClick={() => setIsChatOpen(false)}>
+                <CloseIcon sx={{ color: "#004a92" }} />
+              </IconButton>
+            </Box>
+            <Box
+              sx={{
+                height: "0.1vh",
+                overflow: "auto",
+                mb: 1,
+                backgroundColor: "#004a92",
+              }}
+            ></Box>
+            <Box sx={{ height: "70vh", overflow: "auto", mb: 2 }}>
+              <AIChat setChatLoading={setChatLoading} triggerQuery={triggerQuery}/>
+            </Box>
+            {chatLoading && (
+              <Box sx={{ display: "flex", justifyContent: "flex-start" }}>
+                <Typography>{currentMessage}</Typography>
+              </Box>
+            )}
+            <Box sx={{ display: "flex", alignItems: "center" }}>
+              <TextField
+                fullWidth
+                placeholder="Type a message..."
+                variant="outlined"
+                value={chatInput}
+                onChange={(e) => setChatInput(e.target.value)}
+                onKeyPress={(e) => e.key === "Enter" && handleChatSend()}
+                sx={{ backgroundColor: "#fff", borderRadius: 1 }}
+                InputProps={{
+                  endAdornment: (
+                    <IconButton onClick={handleChatSend}>
+                      <SendIcon sx={{ color: "#004a92" }} />
+                    </IconButton>
+                  ),
+                }}
+              />
+              {/* <IconButton>
+                <MicIcon sx={{ color: "#004a92" }} />
+              </IconButton> */}
+            </Box>
+          </Box>
+        )}
+
+        {/** New chat window integration */}
+        {/* <ChatWithBot
+          isChatOpen={isChatOpen}
+          setIsChatOpen={setIsChatOpen}
+          chatMessages={chatMessages}
+          chatInput={chatInput}
+          setChatInput={setChatInput}
+          handleChatSend={handleChatSend}
+          /> */}
+
+        {/* Error Snackbar */}
+        <Snackbar
+          open={!!error}
+          autoHideDuration={6000}
+          onClose={() => setError(null)}
+        >
+          <Alert severity="error" onClose={() => setError(null)}>
+            {error}
+          </Alert>
+        </Snackbar>
+      </Box>
+    </>
+  );
+};
+
+export default withLayout(ChatBotPage);
